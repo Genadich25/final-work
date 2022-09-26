@@ -1,34 +1,34 @@
 package ru.skypro.homework.service.impl;
 
 import ru.skypro.homework.dto.Ads;
+import ru.skypro.homework.dto.CreateAds;
+import ru.skypro.homework.dto.FullAds;
+import ru.skypro.homework.dto.ResponseWrapper;
 import ru.skypro.homework.service.AdsService;
-
-import java.util.List;
 
 public class AdsServiceImpl implements AdsService {
 
     @Override
-    public List<Ads> getAllAds() {
+    public ResponseWrapper<Ads> getAllAds() {
         return null;
     }
 
     @Override
-    public Ads getAdsMe() {
+    public CreateAds addAds(CreateAds createAds) {
         return null;
     }
 
     @Override
-    public Ads addAds(Ads ads) {
+    public ResponseWrapper<Ads> getAdsMe(boolean authenticated, String authority, Object credentials, Object details, Object principal) {
         return null;
     }
 
     @Override
-    public Ads removeAds(Integer idAds) {
-        return null;
+    public void removeAds(Integer idAds) {
     }
 
     @Override
-    public Ads getAds(Integer idAds) {
+    public FullAds getAds(Integer idAds) {
         return null;
     }
 
