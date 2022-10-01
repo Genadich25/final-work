@@ -1,10 +1,12 @@
 package ru.skypro.homework.service.impl;
 
+import org.springframework.stereotype.Service;
 import ru.skypro.homework.dto.Comment;
 import ru.skypro.homework.service.CommentService;
 
 import java.util.List;
 
+@Service
 public class CommentServiceImpl implements CommentService {
     @Override
     public List<Comment> getAdsComments(Integer idAds) {

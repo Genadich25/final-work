@@ -1,15 +1,34 @@
 package ru.skypro.homework.service.impl;
 
-import ru.skypro.homework.dto.Ads;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import ru.skypro.homework.dto.AdsDto;
+import ru.skypro.homework.dto.ResponseWrapper;
+import ru.skypro.homework.entities.Ads;
+import ru.skypro.homework.mapper.AdsMapper;
+import ru.skypro.homework.repositories.AdsRepository;
 import ru.skypro.homework.service.AdsService;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
+@Service
 public class AdsServiceImpl implements AdsService {
 
+    @Autowired
+    AdsRepository adsRepository;
+
     @Override
-    public List<Ads> getAllAds() {
-        return null;
+    public ResponseWrapper<AdsDto> getAllAds() {
+        List<Ads> allAds = adsRepository.findAll();
+        List<AdsDto> result = allAds.stream()
+                .map(s -> AdsMapper.INSTANCE.adsToAdsDto(s))
+                .collect(Collectors.toList());
+        ResponseWrapper<AdsDto> adsDtoResponseWrapper = new ResponseWrapper<>();
+        adsDtoResponseWrapper.setCount(result.size());
+        adsDtoResponseWrapper.setList(result);
+        return adsDtoResponseWrapper;
     }
 
     @Override

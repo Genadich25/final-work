@@ -2,6 +2,7 @@ package ru.skypro.homework.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.skypro.homework.service.impl.AdsServiceImpl;
@@ -14,12 +15,14 @@ import ru.skypro.homework.service.impl.CommentServiceImpl;
 @RequestMapping(value = "/ads")
 public class AdsController {
 
-    private final AdsServiceImpl adsService;
-    private final CommentServiceImpl commentService;
+    @Autowired
+    private AdsServiceImpl adsService;
+    @Autowired
+    private CommentServiceImpl commentService;
 
     @GetMapping
     public ResponseEntity<?> getAllAds(){
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(adsService.getAllAds());
     }
     
     @PostMapping
