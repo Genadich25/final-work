@@ -1,5 +1,6 @@
 package ru.skypro.homework.controller;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -11,12 +12,12 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-import ru.skypro.homework.dto.CreateAdsDto;
-import ru.skypro.homework.dto.ResponseWrapper;
-import ru.skypro.homework.dto.User;
+import ru.skypro.homework.dto.*;
 import ru.skypro.homework.service.impl.AdsServiceImpl;
 import ru.skypro.homework.service.impl.CommentServiceImpl;
 import ru.skypro.homework.service.impl.UserServiceImpl;
+
+import java.util.Collection;
 
 @Slf4j
 @CrossOrigin(value = "http://localhost:3000")
@@ -64,12 +65,37 @@ public class AdsController {
         User user = userService.findUser(userDetails.getUsername());
         return ResponseEntity.ok(adsService.addAds(createAdsDto, user.getId()));
     }
-    
+
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Список объявлений пользователя",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ResponseWrapper.class)
+                    )
+            )
+    })
     @GetMapping(value = "/me")
-    public ResponseEntity<?> getAdsMe(@RequestParam boolean authenticated,
-                                      @RequestParam String authorities,
-                                      @RequestParam Object credentials){
-        return ResponseEntity.ok().build();
+    public ResponseEntity getAdsMe(@RequestParam boolean authenticated,
+                                   @RequestParam String authorities,
+                                   @RequestParam Role credentials,
+                                   @RequestParam Integer details,
+                                   @RequestParam String principal){
+        if (!authenticated) {
+            return ResponseEntity.status(401)
+                    .body("Unauthorized");
+        } else if (credentials != Role.ADMIN || credentials != Role.USER) {
+            return ResponseEntity.status(403)
+                    .body("forbidden");
+        }
+        User user = userService.findUser(userDetails.getUsername());
+        ResponseWrapper<AdsDto> adsMe = adsService.getAdsMe(details, principal, user);
+        if (adsMe == null) {
+            return ResponseEntity.status(404)
+                    .body("Not Found");
+        }
+        return ResponseEntity.ok(adsMe);
     }
 
     @GetMapping(value = "/{ad_pk}/comment")
@@ -99,19 +125,50 @@ public class AdsController {
                                               @PathVariable Integer id){
         return ResponseEntity.ok().build();
     }
-    
+
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Удаление объявления по id",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = String.class)
+                    )
+            )
+    })
     @DeleteMapping(value = "/{id}")
-    public ResponseEntity<?> removeAds(@PathVariable Integer id){
-        return ResponseEntity.ok().build();
+    public ResponseEntity<String> removeAds(@Parameter(example = "1") @PathVariable Integer id){
+        return ResponseEntity.ok(adsService.removeAds(id));
     }
 
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Получение объявления по id",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = AdsAndUserDto.class)
+                    )
+            )
+    })
     @GetMapping(value = "/{id}")
-    public ResponseEntity<?> getAds(@PathVariable Integer id){
-        return ResponseEntity.ok().build();
+    public ResponseEntity<AdsAndUserDto> getAds(@Parameter(example = "1") @PathVariable Integer id){
+        return ResponseEntity.ok(adsService.getAds(id));
     }
 
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Изменение объявления по id",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = AdsDto.class)
+                    )
+            )
+    })
     @PatchMapping(value = "/{id}")
-    public ResponseEntity<?> updateAds(@PathVariable Integer id){
-        return ResponseEntity.ok().build();
+    public ResponseEntity<AdsDto> updateAds(@PathVariable Integer id,
+                                       @RequestBody AdsDto ads){
+        return ResponseEntity.ok(adsService.updateAds(id, ads));
     }
 }

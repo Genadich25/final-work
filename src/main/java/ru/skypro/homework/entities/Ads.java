@@ -16,7 +16,7 @@ public class Ads {
 
     @Id
     @GeneratedValue
-    private Long id;
+    private Integer id;
 
     @Column(name = "author")
     private Integer author;
