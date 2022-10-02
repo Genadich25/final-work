@@ -1,26 +1,36 @@
 package ru.skypro.homework.service.impl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import ru.skypro.homework.dto.AdsDto;
+import ru.skypro.homework.dto.CreateAdsDto;
 import ru.skypro.homework.dto.ResponseWrapper;
 import ru.skypro.homework.entities.Ads;
 import ru.skypro.homework.mapper.AdsMapper;
+import ru.skypro.homework.mapper.CreateAdsMapper;
 import ru.skypro.homework.repositories.AdsRepository;
 import ru.skypro.homework.service.AdsService;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 public class AdsServiceImpl implements AdsService {
 
+    Logger logger = LoggerFactory.getLogger(AdsServiceImpl.class);
     @Autowired
-    AdsRepository adsRepository;
+    private AdsRepository adsRepository;
+    @Autowired
+    private UserServiceImpl userService;
+
+    private UserDetails userDetails;
 
     @Override
     public ResponseWrapper<AdsDto> getAllAds() {
+        logger.info("Получаем список всех объявлений");
         List<Ads> allAds = adsRepository.findAll();
         List<AdsDto> result = allAds.stream()
                 .map(s -> AdsMapper.INSTANCE.adsToAdsDto(s))
@@ -32,13 +42,18 @@ public class AdsServiceImpl implements AdsService {
     }
 
     @Override
-    public Ads getAdsMe() {
+    public ResponseWrapper<AdsDto> getAdsMe() {
+
         return null;
     }
 
     @Override
-    public Ads addAds(Ads ads) {
-        return null;
+    public CreateAdsDto addAds(CreateAdsDto createAdsDto, Integer id) {
+        logger.info("Создание нового объвления");
+        Ads ads = CreateAdsMapper.INSTANCE.adsToAdsDto(createAdsDto);
+        ads.setAuthor(id);
+        adsRepository.save(ads);
+        return createAdsDto;
     }
 
     @Override

@@ -7,6 +7,9 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
+/**
+ * Модель объявления
+ */
 @Entity
 @Data
 public class Ads {
