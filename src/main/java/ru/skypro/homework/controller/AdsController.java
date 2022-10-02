@@ -52,7 +52,7 @@ public class AdsController {
     @ApiResponses({
             @ApiResponse(
                     responseCode = "200",
-                    description = "Сохранение в бд объявлени",
+                    description = "Сохранение объявления в бд",
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = ResponseWrapper.class)
