@@ -9,6 +9,10 @@ import ru.skypro.homework.entities.Ads;
 import ru.skypro.homework.mapper.AdsMapper;
 import ru.skypro.homework.mapper.CreateAdsMapper;
 import ru.skypro.homework.repositories.AdsRepository;
+import ru.skypro.homework.dto.Ads;
+import ru.skypro.homework.dto.CreateAds;
+import ru.skypro.homework.dto.FullAds;
+import ru.skypro.homework.dto.ResponseWrapper;
 import ru.skypro.homework.service.AdsService;
 
 import java.util.List;
@@ -22,6 +26,8 @@ public class AdsServiceImpl implements AdsService {
     private AdsRepository adsRepository;
 
     @Override
+    public ResponseWrapper<Ads> getAllAds() {
+        return null;
     public ResponseWrapper<AdsDto> getAllAds() {
         logger.info("Получаем список всех объявлений");
         List<Ads> allAds = adsRepository.findAll();

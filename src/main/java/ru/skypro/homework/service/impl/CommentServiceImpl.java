@@ -2,6 +2,8 @@ package ru.skypro.homework.service.impl;
 
 import org.springframework.stereotype.Service;
 import ru.skypro.homework.dto.Comment;
+import ru.skypro.homework.dto.AdsComment;
+import ru.skypro.homework.dto.ResponseWrapper;
 import ru.skypro.homework.service.CommentService;
 
 import java.util.List;
@@ -14,22 +16,22 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public Comment addAdsComments(Comment comment) {
+    public AdsComment addAdsComments(String idAds) {
         return null;
     }
 
     @Override
-    public Comment deleteAdsComment(Integer idComment) {
+    public void deleteAdsComment(String idAds, Integer idComment) {
+
+    }
+
+    @Override
+    public AdsComment getAdsComment(String idAds, Integer idComment) {
         return null;
     }
 
     @Override
-    public Comment getAdsComment(Integer idComment) {
-        return null;
-    }
-
-    @Override
-    public Comment updateAdsComment(Integer idComment) {
+    public AdsComment updateAdsComment(String idAds, Integer idComment) {
         return null;
     }
 }

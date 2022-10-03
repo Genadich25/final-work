@@ -1,14 +1,7 @@
 package ru.skypro.homework.controller;
 
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -35,16 +28,6 @@ public class AdsController {
     @Autowired
     private AuthServiceImpl authService;
 
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Список всех объявлений",
-                    content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = ResponseWrapper.class)
-                    )
-            )
-    })
     @GetMapping
     public ResponseEntity<ResponseWrapper> getAllAds(){
         return ResponseEntity.ok(adsService.getAllAds());
@@ -113,19 +96,20 @@ public class AdsController {
     @DeleteMapping(value = "/{ad_pk}/comment/{id}")
     public ResponseEntity<?> deleteAdsComment(@PathVariable String ad_pk, 
                                               @PathVariable Integer id){
+        commentService.deleteAdsComment(ad_pk, id);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping(value = "/{ad_pk}/comment/{id}")
-    public ResponseEntity<?> getAdsComment(@PathVariable String ad_pk,
-                                           @PathVariable Integer id){
-        return ResponseEntity.ok().build();
+    public ResponseEntity<AdsComment> getAdsComment(@PathVariable String ad_pk,
+                                                    @PathVariable Integer id){
+        return ResponseEntity.ok(commentService.getAdsComment(ad_pk, id));
     }
 
     @PatchMapping(value = "/{ad_pk}/comment/{id}")
-    public ResponseEntity<?> updateAdsComment(@PathVariable String ad_pk,
-                                              @PathVariable Integer id){
-        return ResponseEntity.ok().build();
+    public ResponseEntity<AdsComment> updateAdsComment(@PathVariable String ad_pk,
+                                                       @PathVariable Integer id){
+        return ResponseEntity.ok(commentService.updateAdsComment(ad_pk, id));
     }
 
     @ApiResponses({
