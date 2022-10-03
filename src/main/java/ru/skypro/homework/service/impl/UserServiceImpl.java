@@ -56,4 +56,9 @@ public class UserServiceImpl implements UserService {
         user.setId(id);
         return user;
     }
+
+    @Override
+    public User findUserByName(String name) {
+        return null;
+    }
 }

@@ -10,14 +10,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import ru.skypro.homework.dto.*;
 import ru.skypro.homework.service.impl.AdsServiceImpl;
+import ru.skypro.homework.service.impl.AuthServiceImpl;
 import ru.skypro.homework.service.impl.CommentServiceImpl;
 import ru.skypro.homework.service.impl.UserServiceImpl;
-
-import java.util.Collection;
 
 @Slf4j
 @CrossOrigin(value = "http://localhost:3000")
@@ -32,7 +32,8 @@ public class AdsController {
     private CommentServiceImpl commentService;
     @Autowired
     private UserServiceImpl userService;
-    private UserDetails userDetails;
+    @Autowired
+    private AuthServiceImpl authService;
 
     @ApiResponses({
             @ApiResponse(
@@ -61,8 +62,8 @@ public class AdsController {
     })
     @PostMapping
     public ResponseEntity<CreateAdsDto> addAds(@RequestBody CreateAdsDto createAdsDto){
-
-        User user = userService.findUser(userDetails.getUsername());
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = userService.findUserByName(authentication.getName());
         return ResponseEntity.ok(adsService.addAds(createAdsDto, user.getId()));
     }
 
@@ -89,7 +90,8 @@ public class AdsController {
             return ResponseEntity.status(403)
                     .body("forbidden");
         }
-        User user = userService.findUser(userDetails.getUsername());
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = userService.findUserByName(authentication.getName());
         ResponseWrapper<AdsDto> adsMe = adsService.getAdsMe(details, principal, user);
         if (adsMe == null) {
             return ResponseEntity.status(404)
