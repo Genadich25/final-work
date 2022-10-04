@@ -5,7 +5,7 @@ import ru.skypro.homework.dto.ResponseWrapper;
 
 public interface CommentService {
 
-    public ResponseWrapper<AdsComment> getAdsComments(String idAds);
+    public ResponseWrapper<AdsComment> getAdsComments(Integer idAds);
 
     public AdsComment addAdsComments(String idAds);
 

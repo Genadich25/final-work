@@ -39,7 +39,7 @@ public class AdsController {
 
     @GetMapping(value = "/{ad_pk}/comment")
     public ResponseEntity<ResponseWrapper<AdsComment>> getAdsComments(@PathVariable String ad_pk){
-        return ResponseEntity.ok(commentService.getAdsComments(ad_pk));
+        return ResponseEntity.ok(commentService.getAdsComments(Integer.valueOf(ad_pk)));
     }
 
     @PostMapping(value = "/{ad_pk}/comment")
