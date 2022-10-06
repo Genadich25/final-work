@@ -1,59 +1,90 @@
 package ru.skypro.homework.service.impl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import ru.skypro.homework.dto.CreateUser;
-import ru.skypro.homework.dto.NewPassword;
+import ru.skypro.homework.dto.CreateUserDto;
+import ru.skypro.homework.dto.NewPasswordDto;
 import ru.skypro.homework.dto.ResponseWrapper;
-import ru.skypro.homework.dto.User;
+import ru.skypro.homework.dto.UserDto;
+import ru.skypro.homework.entities.SiteUser;
+import ru.skypro.homework.mappers.UserMapper;
+import ru.skypro.homework.repositories.SiteUserRepository;
 import ru.skypro.homework.service.UserService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserServiceImpl implements UserService {
 
+    private final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
+
+    private final SiteUserRepository siteUserRepository;
+    private final UserMapper userMapper;
+
+    public UserServiceImpl(SiteUserRepository siteUserRepository, UserMapper userMapper) {
+        this.siteUserRepository = siteUserRepository;
+        this.userMapper = userMapper;
+    }
+
 
     @Override
-    public CreateUser addUser(CreateUser user) {
-        CreateUser createUser = new CreateUser();
-        createUser.setFirstName(user.getFirstName());
-        createUser.setLastName(user.getLastName());
-        createUser.setEmail(user.getEmail());
-        createUser.setPhone(user.getPhone());
-        createUser.setPassword(user.getPassword());
-        return createUser;
+    public CreateUserDto addUser(CreateUserDto user) {
+        logger.info("Request for creating user with firstName: {}; lastName: {}; phone: {}; email: {}", user.getFirstName(), user.getLastName(),
+                user.getPhone(), user.getEmail());
+        SiteUser siteUser = userMapper.fromCreateUserDtoToSiteUser(user);
+        return userMapper.fromSiteUserToCreateUserDto(siteUserRepository.save(siteUser));
     }
 
     @Override
-    public ResponseWrapper<User> getUsers() {
-        List<User> list = new ArrayList<>();
-        list.add(new User());
-        Integer count = list.size();
-        ResponseWrapper<User> response = new ResponseWrapper<>();
-        response.setCount(count);
-        response.setList(list);
-        return response;
+    public ResponseWrapper<UserDto> getUsers() {
+        logger.info("Request for getting list of all users");
+        List<SiteUser> siteUsers = siteUserRepository.findAll();
+        List<UserDto> result = new ArrayList<>();
+        for (SiteUser user : siteUsers) {
+            result.add(userMapper.fromSiteUserToUserDto(user));
+        }
+        ResponseWrapper<UserDto> responseWrapperDto = new ResponseWrapper<>();
+        responseWrapperDto.setList(result);
+        responseWrapperDto.setCount(result.size());
+        return responseWrapperDto;
     }
 
     @Override
-    public User updateUser(User user) {
-        return user;
+    public UserDto updateUser(UserDto userDto) {
+        logger.info("Request for updating userDto with id: {}", userDto.getId());
+        Optional<SiteUser> siteUser = siteUserRepository.findById(userDto.getId());
+        if (siteUser.isEmpty()) {
+            logger.info("There are not userDto with id {} in list of users", userDto.getId());
+            return null;
+        } else {
+            SiteUser user = userMapper.fromUserDtoToSiteUser(siteUser.get(), userDto);
+            user.setPassword(siteUser.get().getPassword());
+            logger.info("Changes are finished");
+            return userMapper.fromSiteUserToUserDto(siteUserRepository.save(user));
+        }
     }
 
     @Override
-    public NewPassword setPassword(NewPassword password) {
-        return password;
+    public NewPasswordDto setPassword(NewPasswordDto password) {
+        Optional<SiteUser> userOptional = siteUserRepository.findSiteUserByPassword(password.getCurrentPassword());
+        if (userOptional.isEmpty()) {
+            return null;
+        } else {
+            SiteUser result = userOptional.get();
+            logger.info("Request for change password of user with firstName: {}; lastName: {}", result.getFirstName(), result.getLastName());
+            result.setPassword(password.getNewPassword());
+            siteUserRepository.save(result);
+            return password;
+        }
     }
 
     @Override
-    public User getUser(Integer id) {
-        User user = new User();
-        user.setFirstName("John");
-        user.setLastName("Cage");
-        user.setPhone("145");
-        user.setEmail("johnyCage@gmail.com");
-        user.setId(id);
-        return user;
+    public UserDto getUser(Integer id) {
+        logger.info("Request for getting information about user with id {}", id);
+        Optional<SiteUser> siteUser = siteUserRepository.findById(id);
+        return siteUser.map(userMapper::fromSiteUserToUserDto).orElse(null);
     }
 }
