@@ -1,11 +1,12 @@
 package ru.skypro.homework.controller;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.skypro.homework.dto.CreateUser;
-import ru.skypro.homework.dto.NewPassword;
+import ru.skypro.homework.dto.CreateUserDto;
+import ru.skypro.homework.dto.NewPasswordDto;
 import ru.skypro.homework.dto.ResponseWrapper;
-import ru.skypro.homework.dto.User;
+import ru.skypro.homework.dto.UserDto;
 import ru.skypro.homework.service.UserService;
 
 @RestController
@@ -20,32 +21,44 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<CreateUser> addUser(@RequestBody CreateUser createUser) {
-        CreateUser user = userService.addUser(createUser);
-        return ResponseEntity.ok(user);
+    public ResponseEntity<CreateUserDto> addUser(@RequestBody CreateUserDto createUser) {
+        if (createUser.getEmail() == null || createUser.getPassword() == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+        CreateUserDto createUserDto = userService.addUser(createUser);
+        return ResponseEntity.ok(createUserDto);
     }
 
     @GetMapping("/me")
-    public ResponseEntity<ResponseWrapper<User>> getUsers() {
-        ResponseWrapper<User> result = userService.getUsers();
+    public ResponseEntity<ResponseWrapper<UserDto>> getUsers() {
+        ResponseWrapper<UserDto> result = userService.getUsers();
         return ResponseEntity.ok(result);
     }
 
     @PatchMapping("/me")
-    public ResponseEntity<User> updateUser(@RequestBody User user) {
-        User result = userService.updateUser(user);
+    public ResponseEntity<UserDto> updateUser(@RequestBody UserDto user) {
+        UserDto result = userService.updateUser(user);
+        if (result == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
         return ResponseEntity.ok(result);
     }
 
     @PostMapping("/set_password")
-    public ResponseEntity<NewPassword> setPassword(@RequestBody NewPassword password) {
-        NewPassword result = userService.setPassword(password);
+    public ResponseEntity<NewPasswordDto> setPassword(@RequestBody NewPasswordDto password) {
+        NewPasswordDto result = userService.setPassword(password);
+        if (result == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
         return ResponseEntity.ok(result);
     }
 
     @GetMapping("{id}")
-    public ResponseEntity<User> getUser(@PathVariable Integer id) {
-        User result = userService.getUser(id);
+    public ResponseEntity<UserDto> getUser(@PathVariable Integer id) {
+        UserDto result = userService.getUser(id);
+        if (result == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
         return ResponseEntity.ok(result);
     }
 
