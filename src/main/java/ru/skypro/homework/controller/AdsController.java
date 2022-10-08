@@ -14,8 +14,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import ru.skypro.homework.dto.*;
+import ru.skypro.homework.entities.SiteUser;
 import ru.skypro.homework.service.impl.AdsServiceImpl;
-import ru.skypro.homework.service.impl.AuthServiceImpl;
 import ru.skypro.homework.service.impl.CommentServiceImpl;
 import ru.skypro.homework.service.impl.UserServiceImpl;
 
@@ -32,8 +32,6 @@ public class AdsController {
     private CommentServiceImpl commentService;
     @Autowired
     private UserServiceImpl userService;
-    @Autowired
-    private AuthServiceImpl authService;
 
     @GetMapping
     public ResponseEntity<ResponseWrapper> getAllAds(){
@@ -53,7 +51,7 @@ public class AdsController {
     @PostMapping
     public ResponseEntity<CreateAdsDto> addAds(@RequestBody CreateAdsDto createAdsDto){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User user = userService.findUserByName(authentication.getName());
+        SiteUser user = userService.findUserByName(authentication.getName());
         return ResponseEntity.ok(adsService.addAds(createAdsDto, user.getId()));
     }
 
@@ -81,7 +79,7 @@ public class AdsController {
                     .body("forbidden");
         }
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User user = userService.findUserByName(authentication.getName());
+        SiteUser user = userService.findUserByName(authentication.getName());
         ResponseWrapper<AdsDto> adsMe = adsService.getAdsMe(details, principal, user);
         if (adsMe == null) {
             return ResponseEntity.status(404)
@@ -101,7 +99,7 @@ public class AdsController {
     }
     
     @DeleteMapping(value = "/{ad_pk}/comment/{id}")
-    public ResponseEntity<?> deleteAdsComment(@PathVariable String ad_pk, 
+    public ResponseEntity<?> deleteAdsComment(@PathVariable String ad_pk,
                                               @PathVariable Integer id){
         commentService.deleteAdsComment(ad_pk, id);
         return ResponseEntity.ok().build();

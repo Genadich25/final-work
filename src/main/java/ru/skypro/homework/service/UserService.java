@@ -4,6 +4,7 @@ import ru.skypro.homework.dto.CreateUserDto;
 import ru.skypro.homework.dto.NewPasswordDto;
 import ru.skypro.homework.dto.ResponseWrapper;
 import ru.skypro.homework.dto.UserDto;
+import ru.skypro.homework.entities.SiteUser;
 
 public interface UserService {
 
@@ -17,7 +18,7 @@ public interface UserService {
 
     UserDto getUser(Integer id);
 
-    User findUserByName(String name);
+    SiteUser findUserByName(String name);
 
 
 }

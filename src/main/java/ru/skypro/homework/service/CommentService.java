@@ -5,13 +5,14 @@ import ru.skypro.homework.dto.ResponseWrapper;
 
 public interface CommentService {
 
-    public ResponseWrapper<AdsComment> getAdsComments(String idAds);
 
-    public AdsComment addAdsComments(String idAds);
+    ResponseWrapper<AdsComment> getAdsComments(Integer idAds);
 
-    public void deleteAdsComment(String idAds, Integer idComment);
+    AdsComment addAdsComments(String idAds);
 
-    public AdsComment getAdsComment(String idAds, Integer idComment);
+    void deleteAdsComment(String idAds, Integer idComment);
+
+    AdsComment getAdsComment(String idAds, Integer idComment);
 
     public AdsComment updateAdsComment(String idAds, Integer idComment);
 }

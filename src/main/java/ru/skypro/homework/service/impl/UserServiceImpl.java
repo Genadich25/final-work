@@ -89,7 +89,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User findUserByName(String name) {
-        return null;
+    public SiteUser findUserByName(String name) {
+        return siteUserRepository.findSiteUserByLastName(name);
     }
 }

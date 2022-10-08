@@ -6,7 +6,7 @@ import org.mapstruct.factory.Mappers;
 import ru.skypro.homework.dto.AdsAndUserDto;
 import ru.skypro.homework.dto.AdsDto;
 import ru.skypro.homework.dto.CreateAdsDto;
-import ru.skypro.homework.dto.CreateUser;
+import ru.skypro.homework.dto.CreateUserDto;
 import ru.skypro.homework.entities.Ads;
 
 @Mapper
@@ -43,6 +43,6 @@ public interface AdsMapper {
     @Mapping(source  = "pk", target  = "pk")
     @Mapping(source  = "price", target  = "price")
     @Mapping(source  = "title", target  = "title")
-    AdsAndUserDto createAdsAndUserDto(CreateAdsDto createAdsDto, CreateUser createUser);
+    AdsAndUserDto createAdsAndUserDto(CreateAdsDto createAdsDto, CreateUserDto createUser);
 
 }
