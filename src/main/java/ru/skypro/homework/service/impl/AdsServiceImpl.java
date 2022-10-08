@@ -3,13 +3,12 @@ package ru.skypro.homework.service.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 import ru.skypro.homework.dto.*;
 import ru.skypro.homework.entities.Ads;
 import ru.skypro.homework.entities.SiteUser;
-import ru.skypro.homework.mapper.AdsMapper;
-import ru.skypro.homework.mapper.CreateAdsMapper;
+import ru.skypro.homework.mappers.AdsMapper;
+import ru.skypro.homework.mappers.CreateAdsMapper;
 import ru.skypro.homework.repositories.AdsRepository;
 import ru.skypro.homework.service.AdsService;
 

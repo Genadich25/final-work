@@ -1,4 +1,4 @@
-package ru.skypro.homework.mapper;
+package ru.skypro.homework.mappers;
 
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
