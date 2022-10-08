@@ -1,11 +1,10 @@
 package ru.skypro.homework.entities;
 
 import lombok.Data;
+import ru.skypro.homework.dto.CommentDto;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
+import java.util.List;
 
 /**
  * Модель объявления
@@ -32,4 +31,24 @@ public class Ads {
 
     @Column(name = "title")
     private String title;
+
+    @OneToMany(mappedBy = "ads")
+    private List<Comment> commentList;
+
+    public Comment addComment(Comment comment){
+        commentList.add(comment);
+        return comment;
+    }
+
+    public void removeComment(Comment comment){
+        commentList.remove(comment);
+    }
+
+    public Comment updateComment(Comment comment){
+        if(commentList.contains(comment)){
+            commentList.set(commentList.indexOf(comment),comment);
+            return comment;
+        }
+        return new Comment();
+    }
 }

@@ -1,34 +1,91 @@
 package ru.skypro.homework.service.impl;
 
 import org.springframework.stereotype.Service;
-import ru.skypro.homework.dto.AdsComment;
+import org.webjars.NotFoundException;
+import ru.skypro.homework.dto.CommentDto;
 import ru.skypro.homework.dto.ResponseWrapper;
+import ru.skypro.homework.entities.Ads;
+import ru.skypro.homework.entities.Comment;
+import ru.skypro.homework.mappers.CommentMapper;
+import ru.skypro.homework.repositories.AdsRepository;
+import ru.skypro.homework.repositories.CommentRepository;
 import ru.skypro.homework.service.CommentService;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class CommentServiceImpl implements CommentService {
-    @Override
-    public ResponseWrapper<AdsComment> getAdsComments(Integer idAds) {
-        return null;
+
+    private final CommentRepository commentRepository;
+
+    private final AdsRepository adsRepository;
+
+    public CommentServiceImpl(CommentRepository commentRepository, AdsRepository adsRepository) {
+        this.commentRepository = commentRepository;
+        this.adsRepository = adsRepository;
     }
 
     @Override
-    public AdsComment addAdsComments(String idAds) {
-        return null;
+    public ResponseWrapper<CommentDto> getListCommentDto(String idAds) {
+        List<Comment> commentList = commentRepository.findAllByIdAuthor(Integer.parseInt(idAds));
+
+        List<CommentDto> commentDtoList = commentList.stream()
+                .map(CommentMapper.INSTANCE::commentToCommentDto)
+                .collect(Collectors.toList());
+
+        ResponseWrapper<CommentDto> commentDtoResponseWrapper = new ResponseWrapper<>();
+        commentDtoResponseWrapper.setList(commentDtoList);
+        commentDtoResponseWrapper.setCount(commentDtoList.size());
+        return commentDtoResponseWrapper;
     }
 
     @Override
-    public void deleteAdsComment(String idAds, Integer idComment) {
-
+    public CommentDto addCommentDto(String idAds, CommentDto commentDto) {
+        Ads ads = adsRepository.findAdsById(Integer.parseInt(idAds));
+        if(ads != null){
+            Comment comment = CommentMapper.INSTANCE.commentDtoToComment(commentDto);
+            ads.addComment(comment);
+            adsRepository.save(ads);
+            commentRepository.save(comment);
+            return commentDto;
+        }
+        return new CommentDto();
     }
 
     @Override
-    public AdsComment getAdsComment(String idAds, Integer idComment) {
-        return null;
+    public void deleteCommentDto(String idAds, Integer idComment) {
+        Ads ads = adsRepository.findAdsById(Integer.parseInt(idAds));
+        Comment comment = commentRepository.findCommentById(idComment);
+        if(ads != null && comment != null){
+            ads.removeComment(comment);
+            adsRepository.save(ads);
+            commentRepository.delete(comment);
+        }
+        throw new NotFoundException("Ads or Comment Not Found!");
     }
 
     @Override
-    public AdsComment updateAdsComment(String idAds, Integer idComment) {
-        return null;
+    public CommentDto getCommentDto(String idAds, Integer idComment) {
+        Ads ads = adsRepository.findAdsById(Integer.parseInt(idAds));
+        Comment comment = commentRepository.findCommentById(idComment);
+        if(ads != null && comment != null){
+            return CommentMapper.INSTANCE.commentToCommentDto(comment);
+        }
+        return new CommentDto();
+    }
+
+    @Override
+    public CommentDto updateCommentDto(String idAds, Integer idComment) {
+        Ads ads = adsRepository.findAdsById(Integer.parseInt(idAds));
+        Comment comment = commentRepository.findCommentById(idComment);
+        if(ads != null && comment != null){
+            ads.updateComment(comment);
+            adsRepository.save(ads);
+            commentRepository.save(comment);
+            return CommentMapper.INSTANCE.commentToCommentDto(comment);
+        }
+        return new CommentDto();
     }
 }

@@ -1,18 +1,18 @@
 package ru.skypro.homework.service;
 
-import ru.skypro.homework.dto.AdsComment;
+import ru.skypro.homework.dto.CommentDto;
 import ru.skypro.homework.dto.ResponseWrapper;
 
 public interface CommentService {
 
 
-    ResponseWrapper<AdsComment> getAdsComments(Integer idAds);
+    ResponseWrapper<CommentDto> getListCommentDto(String idAds);
 
-    AdsComment addAdsComments(String idAds);
+    CommentDto addCommentDto(String idAds, CommentDto commentDto);
 
-    void deleteAdsComment(String idAds, Integer idComment);
+    void deleteCommentDto(String idAds, Integer idComment);
 
-    AdsComment getAdsComment(String idAds, Integer idComment);
+    CommentDto getCommentDto(String idAds, Integer idComment);
 
-    public AdsComment updateAdsComment(String idAds, Integer idComment);
+    public CommentDto updateCommentDto(String idAds, Integer idComment);
 }

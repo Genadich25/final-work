@@ -89,32 +89,32 @@ public class AdsController {
     }
 
     @GetMapping(value = "/{ad_pk}/comment")
-    public ResponseEntity<?> getAdsComments(@PathVariable String ad_pk){
-        return ResponseEntity.ok().build();
+    public ResponseEntity<ResponseWrapper<CommentDto>> getAdsComments(@PathVariable String ad_pk){
+        return ResponseEntity.ok(commentService.getListCommentDto(ad_pk));
     }
 
     @PostMapping(value = "/{ad_pk}/comment")
-    public ResponseEntity<?> addAdsComments(@PathVariable String ad_pk){
-        return ResponseEntity.ok().build();
+    public ResponseEntity<CommentDto> addAdsComment(@PathVariable String ad_pk, @RequestBody CommentDto commentDto){
+        return ResponseEntity.ok(commentService.addCommentDto(ad_pk, commentDto));
     }
     
     @DeleteMapping(value = "/{ad_pk}/comment/{id}")
     public ResponseEntity<?> deleteAdsComment(@PathVariable String ad_pk,
                                               @PathVariable Integer id){
-        commentService.deleteAdsComment(ad_pk, id);
+        commentService.deleteCommentDto(ad_pk, id);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping(value = "/{ad_pk}/comment/{id}")
-    public ResponseEntity<AdsComment> getAdsComment(@PathVariable String ad_pk,
+    public ResponseEntity<CommentDto> getAdsComment(@PathVariable String ad_pk,
                                                     @PathVariable Integer id){
-        return ResponseEntity.ok(commentService.getAdsComment(ad_pk, id));
+        return ResponseEntity.ok(commentService.getCommentDto(ad_pk, id));
     }
 
     @PatchMapping(value = "/{ad_pk}/comment/{id}")
-    public ResponseEntity<AdsComment> updateAdsComment(@PathVariable String ad_pk,
+    public ResponseEntity<CommentDto> updateAdsComment(@PathVariable String ad_pk,
                                                        @PathVariable Integer id){
-        return ResponseEntity.ok(commentService.updateAdsComment(ad_pk, id));
+        return ResponseEntity.ok(commentService.updateCommentDto(ad_pk, id));
     }
 
     @ApiResponses({
