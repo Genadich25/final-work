@@ -113,8 +113,9 @@ public class AdsController {
 
     @PatchMapping(value = "/{ad_pk}/comment/{id}")
     public ResponseEntity<CommentDto> updateAdsComment(@PathVariable String ad_pk,
-                                                       @PathVariable Integer id){
-        return ResponseEntity.ok(commentService.updateCommentDto(ad_pk, id));
+                                                       @PathVariable Integer id,
+                                                       @RequestBody CommentDto commentDto){
+        return ResponseEntity.ok(commentService.updateCommentDto(ad_pk, id, commentDto));
     }
 
     @ApiResponses({

@@ -1,4 +1,4 @@
-package ru.skypro.homework.mappers;
+package ru.skypro.homework.mappers.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -6,9 +6,10 @@ import org.springframework.stereotype.Service;
 import ru.skypro.homework.dto.CreateUserDto;
 import ru.skypro.homework.dto.UserDto;
 import ru.skypro.homework.entities.SiteUser;
+import ru.skypro.homework.mappers.UserMapper;
 
 @Service
-public class UserMapperImpl implements UserMapper{
+public class UserMapperImpl implements UserMapper {
 
     Logger logger = LoggerFactory.getLogger(UserMapperImpl.class);
 

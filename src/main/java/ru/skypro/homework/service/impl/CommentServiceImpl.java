@@ -6,13 +6,12 @@ import ru.skypro.homework.dto.CommentDto;
 import ru.skypro.homework.dto.ResponseWrapper;
 import ru.skypro.homework.entities.Ads;
 import ru.skypro.homework.entities.Comment;
-import ru.skypro.homework.mappers.CommentMapper;
+import ru.skypro.homework.mappers.impl.CommentMapperImpl;
 import ru.skypro.homework.repositories.AdsRepository;
 import ru.skypro.homework.repositories.CommentRepository;
 import ru.skypro.homework.service.CommentService;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,10 +20,14 @@ public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepository;
 
     private final AdsRepository adsRepository;
+    private final CommentMapperImpl commentMapper;
 
-    public CommentServiceImpl(CommentRepository commentRepository, AdsRepository adsRepository) {
+    public CommentServiceImpl(CommentRepository commentRepository,
+                              AdsRepository adsRepository,
+                              CommentMapperImpl commentMapper) {
         this.commentRepository = commentRepository;
         this.adsRepository = adsRepository;
+        this.commentMapper = commentMapper;
     }
 
     @Override
@@ -32,7 +35,7 @@ public class CommentServiceImpl implements CommentService {
         List<Comment> commentList = commentRepository.findAllByIdAuthor(Integer.parseInt(idAds));
 
         List<CommentDto> commentDtoList = commentList.stream()
-                .map(CommentMapper.INSTANCE::commentToCommentDto)
+                .map(commentMapper::commentToCommentDto)
                 .collect(Collectors.toList());
 
         ResponseWrapper<CommentDto> commentDtoResponseWrapper = new ResponseWrapper<>();
@@ -45,7 +48,7 @@ public class CommentServiceImpl implements CommentService {
     public CommentDto addCommentDto(String idAds, CommentDto commentDto) {
         Ads ads = adsRepository.findAdsById(Integer.parseInt(idAds));
         if(ads != null){
-            Comment comment = CommentMapper.INSTANCE.commentDtoToComment(commentDto);
+            Comment comment = commentMapper.commentDtoToComment(commentDto);
             ads.addComment(comment);
             adsRepository.save(ads);
             commentRepository.save(comment);
@@ -71,20 +74,21 @@ public class CommentServiceImpl implements CommentService {
         Ads ads = adsRepository.findAdsById(Integer.parseInt(idAds));
         Comment comment = commentRepository.findCommentById(idComment);
         if(ads != null && comment != null){
-            return CommentMapper.INSTANCE.commentToCommentDto(comment);
+            return commentMapper.commentToCommentDto(comment);
         }
         return new CommentDto();
     }
 
     @Override
-    public CommentDto updateCommentDto(String idAds, Integer idComment) {
+    public CommentDto updateCommentDto(String idAds, Integer idComment, CommentDto commentDto) {
         Ads ads = adsRepository.findAdsById(Integer.parseInt(idAds));
         Comment comment = commentRepository.findCommentById(idComment);
         if(ads != null && comment != null){
-            ads.updateComment(comment);
+            Comment commentSave = commentMapper.commentDtoToComment(commentDto);
+            ads.updateComment(commentSave);
             adsRepository.save(ads);
-            commentRepository.save(comment);
-            return CommentMapper.INSTANCE.commentToCommentDto(comment);
+            commentRepository.save(commentSave);
+            return commentDto;
         }
         return new CommentDto();
     }

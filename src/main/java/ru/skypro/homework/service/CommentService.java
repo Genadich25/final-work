@@ -14,5 +14,5 @@ public interface CommentService {
 
     CommentDto getCommentDto(String idAds, Integer idComment);
 
-    public CommentDto updateCommentDto(String idAds, Integer idComment);
+    public CommentDto updateCommentDto(String idAds, Integer idComment, CommentDto commentDto);
 }
