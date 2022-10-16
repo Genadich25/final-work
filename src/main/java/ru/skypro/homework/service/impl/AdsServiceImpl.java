@@ -38,7 +38,7 @@ public class AdsServiceImpl implements AdsService {
     @Override
     public ResponseWrapper<AdsDto> getAdsMe(Integer price, String title, SiteUser user) {
         logger.info("Получние объявлений пренадлежащих пользователю");
-        List<Ads> adsMe = adsRepository.findByAuthorAndPriceAndTitle(user.getId(), price, title);
+        List<Ads> adsMe = adsRepository.findByAuthorAndPriceAndTitle(user.getSiteUserDetails().getId(), price, title);
         List<AdsDto> result = adsMe.stream()
                 .map(AdsMapper.INSTANCE::adsToAdsDto)
                 .collect(Collectors.toList());
@@ -69,9 +69,9 @@ public class AdsServiceImpl implements AdsService {
     public AdsAndUserDto getAds(Integer idAds) {
         logger.info("Получение объявления по id");
         Ads ads = adsRepository.findAdsById(idAds);
-        CreateAdsDto createAdsDto= CreateAdsMapper.INSTANCE.adsToAdsDto(ads);
+        CreateAdsDto createAdsDto = CreateAdsMapper.INSTANCE.adsToAdsDto(ads);
         CreateUserDto createUser = new CreateUserDto();
-        AdsAndUserDto adsAndUserDto= AdsMapper.INSTANCE.createAdsAndUserDto(createAdsDto, createUser);
+        AdsAndUserDto adsAndUserDto = AdsMapper.INSTANCE.createAdsAndUserDto(createAdsDto, createUser);
         return adsAndUserDto;
     }
 
@@ -83,4 +83,20 @@ public class AdsServiceImpl implements AdsService {
         adsRepository.save(adsNew);
         return adsDto;
     }
+
+    @Override
+    public ResponseWrapper<AdsDto> getAdsWithTitleContainsText(String text) {
+        List<Ads> adsList = adsRepository.findAdsByTitleContains(text);
+        if (adsList.isEmpty()) {
+            return null;
+        } else {
+            List<AdsDto> list = adsList.stream().map(AdsMapper.INSTANCE::adsToAdsDto).collect(Collectors.toList());
+            ResponseWrapper<AdsDto> result = new ResponseWrapper<>();
+            result.setList(list);
+            result.setCount(list.size());
+            return result;
+        }
+    }
+
+
 }
