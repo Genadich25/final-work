@@ -139,12 +139,12 @@ public class AdsController {
                     description = "Получение объявления по id",
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = AdsAndUserDto.class)
+                            schema = @Schema(implementation = FullAds.class)
                     )
             )
     })
     @GetMapping(value = "/{id}")
-    public ResponseEntity<AdsAndUserDto> getAds(@Parameter(example = "1") @PathVariable Integer id){
+    public ResponseEntity<FullAds> getAds(@Parameter(example = "1") @PathVariable Integer id){
         return ResponseEntity.ok(adsService.getAds(id));
     }
 

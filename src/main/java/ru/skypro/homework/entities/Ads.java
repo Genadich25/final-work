@@ -15,7 +15,8 @@ public class Ads {
 
     @Id
     @GeneratedValue
-    private Integer id;
+    @Column(name = "pk")
+    private Integer pk;
 
     @Column(name = "author")
     private Integer author;
@@ -23,14 +24,14 @@ public class Ads {
     @Column(name = "image")
     private String image;
 
-    @Column(name = "pk")
-    private Integer pk;
-
     @Column(name = "price")
     private Integer price;
 
     @Column(name = "title")
     private String title;
+
+    @Column(name = "description")
+    private String description;
 
     @ManyToOne(cascade = {
             CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})

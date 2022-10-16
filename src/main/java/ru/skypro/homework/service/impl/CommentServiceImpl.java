@@ -46,7 +46,7 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public CommentDto addCommentDto(String idAds, CommentDto commentDto) {
-        Ads ads = adsRepository.findAdsById(Integer.parseInt(idAds));
+        Ads ads = adsRepository.findAdsByPk(Integer.parseInt(idAds));
         if(ads != null){
             Comment comment = commentMapper.commentDtoToComment(commentDto);
             ads.addComment(comment);
@@ -59,7 +59,7 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public void deleteCommentDto(String idAds, Integer idComment) {
-        Ads ads = adsRepository.findAdsById(Integer.parseInt(idAds));
+        Ads ads = adsRepository.findAdsByPk(Integer.parseInt(idAds));
         Comment comment = commentRepository.findCommentById(idComment);
         if(ads != null && comment != null){
             ads.removeComment(comment);
@@ -71,7 +71,7 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public CommentDto getCommentDto(String idAds, Integer idComment) {
-        Ads ads = adsRepository.findAdsById(Integer.parseInt(idAds));
+        Ads ads = adsRepository.findAdsByPk(Integer.parseInt(idAds));
         Comment comment = commentRepository.findCommentById(idComment);
         if(ads != null && comment != null){
             return commentMapper.commentToCommentDto(comment);
@@ -81,7 +81,7 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public CommentDto updateCommentDto(String idAds, Integer idComment, CommentDto commentDto) {
-        Ads ads = adsRepository.findAdsById(Integer.parseInt(idAds));
+        Ads ads = adsRepository.findAdsByPk(Integer.parseInt(idAds));
         Comment comment = commentRepository.findCommentById(idComment);
         if(ads != null && comment != null){
             Comment commentSave = commentMapper.commentDtoToComment(commentDto);
@@ -99,7 +99,7 @@ public class CommentServiceImpl implements CommentService {
         if (result.isEmpty()) {
             return null;
         } else {
-            List<CommentDto> list = result.stream().map(CommentMapper.INSTANCE::commentToCommentDto).collect(Collectors.toList());
+            List<CommentDto> list = result.stream().map(commentMapper::commentToCommentDto).collect(Collectors.toList());
             ResponseWrapper<CommentDto> responseWrapperDto = new ResponseWrapper<>();
             responseWrapperDto.setList(list);
             responseWrapperDto.setCount(list.size());
