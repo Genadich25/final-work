@@ -2,8 +2,9 @@ package ru.skypro.homework.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import ru.skypro.homework.dto.CreateUserDto;
 import ru.skypro.homework.dto.NewPasswordDto;
 import ru.skypro.homework.dto.ResponseWrapper;
 import ru.skypro.homework.dto.UserDto;
@@ -20,15 +21,6 @@ public class UserController {
         this.userService = userService;
     }
 
-    @PostMapping
-    public ResponseEntity<CreateUserDto> addUser(@RequestBody CreateUserDto createUser) {
-        if (createUser.getEmail() == null || createUser.getPassword() == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
-        CreateUserDto createUserDto = userService.addUser(createUser);
-        return ResponseEntity.ok(createUserDto);
-    }
-
     @GetMapping("/me")
     public ResponseEntity<ResponseWrapper<UserDto>> getUsers() {
         ResponseWrapper<UserDto> result = userService.getUsers();
@@ -37,7 +29,8 @@ public class UserController {
 
     @PatchMapping("/me")
     public ResponseEntity<UserDto> updateUser(@RequestBody UserDto user) {
-        UserDto result = userService.updateUser(user);
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        UserDto result = userService.updateUser(user, email);
         if (result == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
@@ -46,7 +39,8 @@ public class UserController {
 
     @PostMapping("/set_password")
     public ResponseEntity<NewPasswordDto> setPassword(@RequestBody NewPasswordDto password) {
-        NewPasswordDto result = userService.setPassword(password);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        NewPasswordDto result = userService.setPassword(password, authentication);
         if (result == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }

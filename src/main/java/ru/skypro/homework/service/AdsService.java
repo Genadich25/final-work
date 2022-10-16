@@ -19,4 +19,6 @@ public interface AdsService {
     public AdsAndUserDto getAds(Integer idAds);
 
     public AdsDto updateAds(Integer idAds, AdsDto ads);
+
+    ResponseWrapper<AdsDto> getAdsWithTitleContainsText(String text);
 }

@@ -92,4 +92,18 @@ public class CommentServiceImpl implements CommentService {
         }
         return new CommentDto();
     }
+
+    @Override
+    public ResponseWrapper<CommentDto> getCommentWithText(String text) {
+        List<Comment> result = commentRepository.findCommentsByTextContains(text);
+        if (result.isEmpty()) {
+            return null;
+        } else {
+            List<CommentDto> list = result.stream().map(CommentMapper.INSTANCE::commentToCommentDto).collect(Collectors.toList());
+            ResponseWrapper<CommentDto> responseWrapperDto = new ResponseWrapper<>();
+            responseWrapperDto.setList(list);
+            responseWrapperDto.setCount(list.size());
+            return responseWrapperDto;
+        }
+    }
 }

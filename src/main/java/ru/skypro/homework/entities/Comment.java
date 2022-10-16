@@ -28,4 +28,8 @@ public class Comment {
     @JoinColumn(name="ads")
     private Ads ads;
 
+    @ManyToOne(cascade = {
+            CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    private SiteUserDetails siteUserDetails;
+
 }

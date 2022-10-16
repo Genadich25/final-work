@@ -7,10 +7,10 @@ import ru.skypro.homework.entities.SiteUser;
 import java.util.Optional;
 
 @Repository
-public interface SiteUserRepository extends JpaRepository<SiteUser, Integer> {
+public interface SiteUserRepository extends JpaRepository<SiteUser, String> {
 
     Optional<SiteUser> findSiteUserByPassword(String password);
 
-    SiteUser findSiteUserByLastName(String name);
+    Optional<SiteUser> findSiteUserByUsername(String email);
 
 }
