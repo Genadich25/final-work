@@ -52,7 +52,7 @@ public class AdsController {
     public ResponseEntity<CreateAdsDto> addAds(@RequestBody CreateAdsDto createAdsDto){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         SiteUser user = userService.findUserByName(authentication.getName());
-        return ResponseEntity.ok(adsService.addAds(createAdsDto, user.getId()));
+        return ResponseEntity.ok(adsService.addAds(createAdsDto, user.getSiteUserDetails().getId()));
     }
 
     @ApiResponses({

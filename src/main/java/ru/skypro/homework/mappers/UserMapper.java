@@ -1,16 +1,12 @@
 package ru.skypro.homework.mappers;
 
-import ru.skypro.homework.dto.CreateUserDto;
 import ru.skypro.homework.dto.UserDto;
 import ru.skypro.homework.entities.SiteUser;
+import ru.skypro.homework.entities.SiteUserDetails;
 
 public interface UserMapper {
 
-    SiteUser fromCreateUserDtoToSiteUser(CreateUserDto userDto);
-
-    CreateUserDto fromSiteUserToCreateUserDto(SiteUser user);
-
     SiteUser fromUserDtoToSiteUser(SiteUser siteUser, UserDto userDto);
 
-    UserDto fromSiteUserToUserDto(SiteUser user);
+    UserDto fromSiteUserToUserDto(SiteUserDetails user);
 }

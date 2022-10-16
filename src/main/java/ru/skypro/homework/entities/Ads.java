@@ -32,6 +32,10 @@ public class Ads {
     @Column(name = "title")
     private String title;
 
+    @ManyToOne(cascade = {
+            CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    private SiteUserDetails siteUserDetails;
+
     @OneToMany(mappedBy = "ads")
     private List<Comment> commentList;
 

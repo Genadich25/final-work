@@ -1,6 +1,6 @@
 package ru.skypro.homework.service;
 
-import ru.skypro.homework.dto.CreateUserDto;
+import org.springframework.security.core.Authentication;
 import ru.skypro.homework.dto.NewPasswordDto;
 import ru.skypro.homework.dto.ResponseWrapper;
 import ru.skypro.homework.dto.UserDto;
@@ -8,13 +8,11 @@ import ru.skypro.homework.entities.SiteUser;
 
 public interface UserService {
 
-    CreateUserDto addUser(CreateUserDto user);
-
     ResponseWrapper<UserDto> getUsers();
 
-    UserDto updateUser(UserDto user);
+    UserDto updateUser(UserDto user, String email);
 
-    NewPasswordDto setPassword(NewPasswordDto password);
+    NewPasswordDto setPassword(NewPasswordDto password, Authentication auth);
 
     UserDto getUser(Integer id);
 
