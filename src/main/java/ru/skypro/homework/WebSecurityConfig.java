@@ -1,5 +1,6 @@
 package ru.skypro.homework;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -31,21 +32,9 @@ public class WebSecurityConfig implements WebMvcConfigurer {
             "/ads"
     };
 
-    private final DataSource dataSource;
+    @Autowired
+    private DataSource dataSource;
 
-    public WebSecurityConfig(DataSource dataSource) {
-        this.dataSource = dataSource;
-    }
-
-//    @Bean
-//    public InMemoryUserDetailsManager userDetailsService() {
-//        UserDetails user = User.withDefaultPasswordEncoder()
-//                .username("user@gmail.com")
-//                .password("password")
-//                .roles("USER")
-//                .build();
-//        return new InMemoryUserDetailsManager(user);
-//    }
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
