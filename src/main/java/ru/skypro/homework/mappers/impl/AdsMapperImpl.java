@@ -13,7 +13,7 @@ public class AdsMapperImpl implements AdsMapper {
     @Override
     public AdsDto adsToAdsDto(Ads ads) {
         AdsDto adsDto = new AdsDto();
-        adsDto.setPk(ads.getPk());
+        adsDto.setPk(ads.getId());
         adsDto.setAuthor(ads.getAuthor());
         adsDto.setImage(ads.getImage());
         adsDto.setTitle(ads.getTitle());
@@ -22,20 +22,20 @@ public class AdsMapperImpl implements AdsMapper {
     }
 
     @Override
-    public Ads adsDtoToAds(AdsDto adsDto) {
-        Ads ads = new Ads();
-        ads.setPk(adsDto.getPk());
-        ads.setAuthor(adsDto.getAuthor());
-        ads.setImage(adsDto.getImage());
-        ads.setTitle(adsDto.getTitle());
-        ads.setPrice(adsDto.getPrice());
+    public Ads adsDtoToAds(AdsDto adsDto, Ads ads) {
+        if (adsDto.getTitle() != null) {
+            ads.setTitle(adsDto.getTitle());
+        }
+        if (adsDto.getPrice() != null) {
+            ads.setPrice(adsDto.getPrice());
+        }
         return ads;
     }
 
     @Override
     public Ads adsToCreateAdsDto(CreateAdsDto createAdsDto) {
         Ads ads = new Ads();
-        ads.setPk(createAdsDto.getPk());
+        ads.setId(createAdsDto.getPk());
         ads.setImage(createAdsDto.getImage());
         ads.setTitle(createAdsDto.getTitle());
         ads.setPrice(createAdsDto.getPrice());
@@ -46,7 +46,7 @@ public class AdsMapperImpl implements AdsMapper {
     @Override
     public CreateAdsDto createAdsDtoToAds(Ads ads) {
         CreateAdsDto createAdsDto = new CreateAdsDto();
-        createAdsDto.setPk(ads.getPk());
+        createAdsDto.setPk(ads.getId());
         createAdsDto.setImage(ads.getImage());
         createAdsDto.setTitle(ads.getTitle());
         createAdsDto.setPrice(ads.getPrice());
@@ -61,7 +61,7 @@ public class AdsMapperImpl implements AdsMapper {
         fullAds.setTitle(ads.getTitle());
         fullAds.setPrice(ads.getPrice());
         fullAds.setDescription(ads.getDescription());
-        fullAds.setPk(ads.getPk());
+        fullAds.setPk(ads.getId());
         fullAds.setAuthorFirstName(user.getFirstName());
         fullAds.setAuthorLastName(user.getLastName());
         fullAds.setEmail(user.getSiteUser().getUsername());

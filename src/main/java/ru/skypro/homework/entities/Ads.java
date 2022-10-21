@@ -1,7 +1,6 @@
 package ru.skypro.homework.entities;
 
 import lombok.Data;
-import ru.skypro.homework.dto.CommentDto;
 
 import javax.persistence.*;
 import java.util.List;
@@ -16,7 +15,7 @@ public class Ads {
     @Id
     @GeneratedValue
     @Column(name = "pk")
-    private Integer pk;
+    private Integer id;
 
     @Column(name = "author")
     private Integer author;
@@ -37,8 +36,11 @@ public class Ads {
             CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     private SiteUserDetails siteUserDetails;
 
-    @OneToMany(mappedBy = "ads")
+    @OneToMany(mappedBy = "ads", cascade = CascadeType.ALL)
     private List<Comment> commentList;
+
+    @OneToMany(mappedBy = "ads", cascade = CascadeType.ALL)
+    private List<Image> images;
 
     public Comment addComment(Comment comment){
         commentList.add(comment);

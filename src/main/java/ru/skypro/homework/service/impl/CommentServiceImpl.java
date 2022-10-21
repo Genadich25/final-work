@@ -1,5 +1,6 @@
 package ru.skypro.homework.service.impl;
 
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.webjars.NotFoundException;
 import ru.skypro.homework.dto.CommentDto;
@@ -8,6 +9,7 @@ import ru.skypro.homework.entities.Ads;
 import ru.skypro.homework.entities.Comment;
 import ru.skypro.homework.mappers.impl.CommentMapperImpl;
 import ru.skypro.homework.repositories.AdsRepository;
+import ru.skypro.homework.repositories.AuthorityRepository;
 import ru.skypro.homework.repositories.CommentRepository;
 import ru.skypro.homework.service.CommentService;
 
@@ -21,13 +23,15 @@ public class CommentServiceImpl implements CommentService {
 
     private final AdsRepository adsRepository;
     private final CommentMapperImpl commentMapper;
+    private final AuthorityRepository authorityRepository;
 
     public CommentServiceImpl(CommentRepository commentRepository,
                               AdsRepository adsRepository,
-                              CommentMapperImpl commentMapper) {
+                              CommentMapperImpl commentMapper, AuthorityRepository authorityRepository) {
         this.commentRepository = commentRepository;
         this.adsRepository = adsRepository;
         this.commentMapper = commentMapper;
+        this.authorityRepository = authorityRepository;
     }
 
     @Override
@@ -47,7 +51,7 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public CommentDto addCommentDto(String idAds, CommentDto commentDto) {
         Ads ads = adsRepository.findAdsByPk(Integer.parseInt(idAds));
-        if(ads != null){
+        if (ads != null) {
             Comment comment = commentMapper.commentDtoToComment(commentDto);
             ads.addComment(comment);
             adsRepository.save(ads);
@@ -58,13 +62,19 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public void deleteCommentDto(String idAds, Integer idComment) {
+    public String deleteCommentDto(String idAds, Integer idComment) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        String auth = authorityRepository.findAuthorityByUsername(username).getAuthority();
         Ads ads = adsRepository.findAdsByPk(Integer.parseInt(idAds));
+        if (auth.equals("ROLE_USER") && !ads.getSiteUserDetails().getSiteUser().getUsername().equals(username)) {
+            return "Not access";
+        }
         Comment comment = commentRepository.findCommentById(idComment);
-        if(ads != null && comment != null){
+        if (ads != null && comment != null) {
             ads.removeComment(comment);
             adsRepository.save(ads);
             commentRepository.delete(comment);
+            return "SUCCESS";
         }
         throw new NotFoundException("Ads or Comment Not Found!");
     }
@@ -73,7 +83,7 @@ public class CommentServiceImpl implements CommentService {
     public CommentDto getCommentDto(String idAds, Integer idComment) {
         Ads ads = adsRepository.findAdsByPk(Integer.parseInt(idAds));
         Comment comment = commentRepository.findCommentById(idComment);
-        if(ads != null && comment != null){
+        if (ads != null && comment != null) {
             return commentMapper.commentToCommentDto(comment);
         }
         return new CommentDto();
@@ -81,16 +91,29 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public CommentDto updateCommentDto(String idAds, Integer idComment, CommentDto commentDto) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        String auth = authorityRepository.findAuthorityByUsername(username).getAuthority();
         Ads ads = adsRepository.findAdsByPk(Integer.parseInt(idAds));
+        if (auth.equals("ROLE_USER") && !ads.getSiteUserDetails().getSiteUser().getUsername().equals(username)) {
+            CommentDto result = new CommentDto();
+            result.setText("Not access");
+            return result;
+        }
         Comment comment = commentRepository.findCommentById(idComment);
-        if(ads != null && comment != null){
+        if (!ads.getCommentList().contains(comment)) {
+            CommentDto bad = new CommentDto();
+            bad.setText("Bad");
+            return bad;
+        }
+        if (ads != null && comment != null) {
             Comment commentSave = commentMapper.commentDtoToComment(commentDto);
             ads.updateComment(commentSave);
             adsRepository.save(ads);
             commentRepository.save(commentSave);
             return commentDto;
+        } else {
+            return null;
         }
-        return new CommentDto();
     }
 
     @Override
