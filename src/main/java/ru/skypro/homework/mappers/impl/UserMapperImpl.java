@@ -1,4 +1,4 @@
-package ru.skypro.homework.mappers;
+package ru.skypro.homework.mappers.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import ru.skypro.homework.dto.UserDto;
 import ru.skypro.homework.entities.SiteUser;
 import ru.skypro.homework.entities.SiteUserDetails;
+import ru.skypro.homework.mappers.UserMapper;
 
 @Service
 public class UserMapperImpl implements UserMapper {
@@ -14,22 +15,20 @@ public class UserMapperImpl implements UserMapper {
 
     @Override
     public SiteUser fromUserDtoToSiteUser(SiteUser siteUser, UserDto userDto) {
-        if (!userDto.getFirstName().equals("")) {
+        SiteUserDetails userDetails = siteUser.getSiteUserDetails();
+        if (userDto.getFirstName() != null) {
             logger.info("Change firstName from {} to {}", siteUser.getSiteUserDetails().getFirstName(), userDto.getFirstName());
-            siteUser.getSiteUserDetails().setFirstName(userDto.getFirstName());
+            userDetails.setFirstName(userDto.getFirstName());
         }
-        if (!userDto.getLastName().equals("")) {
+        if (userDto.getLastName() != null) {
             logger.info("Change lastName from {} to {}", siteUser.getSiteUserDetails().getLastName(), userDto.getLastName());
-            siteUser.getSiteUserDetails().setLastName(userDto.getLastName());
+            userDetails.setLastName(userDto.getLastName());
         }
-        if (!userDto.getPhone().equals("")) {
+        if (userDto.getPhone() != null) {
             logger.info("Change phone from {} to {}", siteUser.getSiteUserDetails().getPhone(), userDto.getPhone());
-            siteUser.getSiteUserDetails().setPhone(userDto.getPhone());
+            userDetails.setPhone(userDto.getPhone());
         }
-        if (!userDto.getEmail().equals("")) {
-            logger.info("Change email from {} to {}", siteUser.getUsername(), userDto.getEmail());
-            siteUser.setUsername(userDto.getEmail());
-        }
+        siteUser.setSiteUserDetails(userDetails);
         return siteUser;
     }
 

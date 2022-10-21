@@ -8,17 +8,17 @@ import ru.skypro.homework.entities.SiteUser;
 
 public interface AdsService {
 
-    public ResponseWrapper<AdsDto> getAllAds();
+    ResponseWrapper<AdsDto> getAllAds();
 
-    public ResponseWrapper<AdsDto> getAdsMe(Integer price, String title, SiteUser user);
+    ResponseWrapper<AdsDto> getAdsMe(Integer price, String title, SiteUser user);
 
-    public CreateAdsDto addAds(CreateAdsDto createAdsDto, Integer id);
+    AdsDto addAds(CreateAdsDto createAdsDto, String email);
 
-    public String removeAds(Integer idAds);
+    String removeAds(Integer idAds);
 
-    public FullAds getAds(Integer idAds);
+    FullAds getAds(Integer idAds);
 
-    public AdsDto updateAds(Integer idAds, AdsDto ads);
+    AdsDto updateAds(Integer idAds, AdsDto ads);
 
     ResponseWrapper<AdsDto> getAdsWithTitleContainsText(String text);
 }

@@ -10,11 +10,11 @@ public interface CommentService {
 
     CommentDto addCommentDto(String idAds, CommentDto commentDto);
 
-    void deleteCommentDto(String idAds, Integer idComment);
+    String deleteCommentDto(String idAds, Integer idComment);
 
     CommentDto getCommentDto(String idAds, Integer idComment);
 
-    public CommentDto updateCommentDto(String idAds, Integer idComment, CommentDto commentDto);
+    CommentDto updateCommentDto(String idAds, Integer idComment, CommentDto commentDto);
 
     ResponseWrapper<CommentDto> getCommentWithText(String text);
 }

@@ -1,6 +1,5 @@
 package ru.skypro.homework.mappers;
 
-import org.mapstruct.Mapping;
 import ru.skypro.homework.dto.AdsDto;
 import ru.skypro.homework.dto.CreateAdsDto;
 import ru.skypro.homework.dto.FullAds;
@@ -12,7 +11,7 @@ public interface AdsMapper {
 
     AdsDto adsToAdsDto(Ads ads);
 
-    Ads adsDtoToAds(AdsDto adsDto);
+    Ads adsDtoToAds(AdsDto adsDto, Ads ads);
 
     Ads adsToCreateAdsDto(CreateAdsDto ads);
 
