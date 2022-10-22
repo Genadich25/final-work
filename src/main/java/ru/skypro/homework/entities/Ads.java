@@ -14,7 +14,7 @@ public class Ads {
 
     @Id
     @GeneratedValue
-    @Column(name = "pk")
+    @Column(name = "id")
     private Integer id;
 
     @Column(name = "author")

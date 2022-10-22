@@ -22,7 +22,7 @@ public class UserController {
         this.userService = userService;
     }
 
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')")
     @GetMapping("/me")
     public ResponseEntity<ResponseWrapper<UserDto>> getUsers() {
         ResponseWrapper<UserDto> result = userService.getUsers();

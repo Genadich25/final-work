@@ -20,6 +20,7 @@ import ru.skypro.homework.service.UserService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -47,12 +48,22 @@ public class UserServiceImpl implements UserService {
         String role = authorityRepository.findAuthorityByUsername(email).getAuthority();
         logger.info("Request for getting list of all users from userName: {}, with role: {}", email, role);
         List<SiteUserDetails> siteUsers = userDetails.findAll();
+        if (role.equals("ROLE_USER")) {
+            List<UserDto> oneUser = siteUsers.stream()
+                    .filter(siteUserDetails -> siteUserDetails.getSiteUser().getUsername().equals(email))
+                    .map(userMapper::fromSiteUserToUserDto)
+                    .collect(Collectors.toList());
+            ResponseWrapper<UserDto> result = new ResponseWrapper<>();
+            result.setResults(oneUser);
+            result.setCount(oneUser.size());
+            return result;
+        }
         List<UserDto> result = new ArrayList<>();
         for (SiteUserDetails user : siteUsers) {
             result.add(userMapper.fromSiteUserToUserDto(user));
         }
         ResponseWrapper<UserDto> responseWrapperDto = new ResponseWrapper<>();
-        responseWrapperDto.setList(result);
+        responseWrapperDto.setResults(result);
         responseWrapperDto.setCount(result.size());
         return responseWrapperDto;
     }
