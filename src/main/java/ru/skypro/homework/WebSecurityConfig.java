@@ -53,7 +53,7 @@ public class WebSecurityConfig implements WebMvcConfigurer {
                                 .mvcMatchers("/ads/**", "/users/**").authenticated()
 
                 )
-                .cors().disable()
+                .cors().and()
                 .httpBasic(withDefaults());
         return http.build();
     }

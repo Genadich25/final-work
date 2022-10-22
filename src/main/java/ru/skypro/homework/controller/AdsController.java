@@ -13,11 +13,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.*;
+import ru.skypro.homework.entities.Ads;
 import ru.skypro.homework.entities.Image;
 import ru.skypro.homework.entities.SiteUser;
 import ru.skypro.homework.repositories.AdsRepository;
@@ -30,6 +30,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.io.IOException;
+import java.util.Optional;
 
 @Slf4j
 @CrossOrigin(value = "http://localhost:3000")
@@ -81,8 +82,13 @@ public class AdsController {
         } else {
             Integer id = result.getPk();
             imageService.uploadImage(image, email, id);
-            result.setImage(adsRepository.findAdsByPk(id).getImage());
-            return ResponseEntity.ok(result);
+            Optional<Ads> adsOptional = adsRepository.findById(id);
+            if (adsOptional.isPresent()) {
+                result.setImage(adsOptional.get().getImage());
+                return ResponseEntity.ok(result);
+            } else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            }
         }
     }
 
@@ -129,13 +135,17 @@ public class AdsController {
     @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')")
     @PostMapping(value = "/{ad_pk}/comment")
     public ResponseEntity<CommentDto> addAdsComment(@PathVariable String ad_pk, @RequestBody CommentDto commentDto) {
-        return ResponseEntity.ok(commentService.addCommentDto(ad_pk, commentDto));
+        CommentDto result = commentService.addCommentDto(ad_pk, commentDto);
+        if (result == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        return ResponseEntity.ok(result);
     }
 
     @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')")
     @DeleteMapping(value = "/{ad_pk}/comment/{id}")
     public ResponseEntity<String> deleteAdsComment(@PathVariable String ad_pk,
-                                              @PathVariable Integer id) {
+                                                   @PathVariable Integer id) {
         String result = commentService.deleteCommentDto(ad_pk, id);
         if (result.equals("Not access")) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -147,7 +157,11 @@ public class AdsController {
     @GetMapping(value = "/{ad_pk}/comment/{id}")
     public ResponseEntity<CommentDto> getAdsComment(@PathVariable String ad_pk,
                                                     @PathVariable Integer id) {
-        return ResponseEntity.ok(commentService.getCommentDto(ad_pk, id));
+        CommentDto result = commentService.getCommentDto(ad_pk, id);
+        if (result == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        return ResponseEntity.ok(result);
     }
 
     @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')")
@@ -182,6 +196,9 @@ public class AdsController {
     @DeleteMapping(value = "/{id}")
     public ResponseEntity<String> removeAds(@Parameter(example = "1") @PathVariable Integer id) {
         String result = adsService.removeAds(id);
+        if (result == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
         if (result.equals("Not access")) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
@@ -202,6 +219,9 @@ public class AdsController {
     @GetMapping(value = "/{id}")
     public ResponseEntity<FullAds> getAds(@Parameter(example = "1") @PathVariable Integer id) {
         FullAds result = adsService.getAds(id);
+        if (result == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
         if (result.getTitle().equals("Not access")) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
@@ -223,6 +243,9 @@ public class AdsController {
     public ResponseEntity<AdsDto> updateAds(@PathVariable Integer id,
                                             @RequestBody AdsDto ads) {
         AdsDto result = adsService.updateAds(id, ads);
+        if (result == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
         if (result.getTitle().equals("Not access")) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }

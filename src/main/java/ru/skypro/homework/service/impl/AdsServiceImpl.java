@@ -48,7 +48,7 @@ public class AdsServiceImpl implements AdsService {
                 .collect(Collectors.toList());
         ResponseWrapper<AdsDto> adsDtoResponseWrapper = new ResponseWrapper<>();
         adsDtoResponseWrapper.setCount(result.size());
-        adsDtoResponseWrapper.setList(result);
+        adsDtoResponseWrapper.setResults(result);
         return adsDtoResponseWrapper;
     }
 
@@ -61,7 +61,7 @@ public class AdsServiceImpl implements AdsService {
                 .collect(Collectors.toList());
         ResponseWrapper<AdsDto> adsDtoResponseWrapper = new ResponseWrapper<>();
         adsDtoResponseWrapper.setCount(result.size());
-        adsDtoResponseWrapper.setList(result);
+        adsDtoResponseWrapper.setResults(result);
         return adsDtoResponseWrapper;
     }
 
@@ -84,12 +84,16 @@ public class AdsServiceImpl implements AdsService {
         logger.info("Удаление объявления по id");
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         String auth = authorityRepository.findAuthorityByUsername(username).getAuthority();
-        Ads ads = adsRepository.findAdsByPk(idAds);
-        if (auth.equals("ROLE_USER") && !ads.getSiteUserDetails().getSiteUser().getUsername().equals(username)) {
-            return "Not access";
+        Optional <Ads> ads = adsRepository.findById(idAds);
+        if (ads.isEmpty()) {
+            return null;
         } else {
-            adsRepository.delete(ads);
-            return "Обявление" + ads + "удалено";
+            if (auth.equals("ROLE_USER") && !ads.get().getSiteUserDetails().getSiteUser().getUsername().equals(username)) {
+                return "Not access";
+            } else {
+                adsRepository.delete(ads.get());
+                return "Обявление" + ads + "удалено";
+            }
         }
     }
 
@@ -98,14 +102,19 @@ public class AdsServiceImpl implements AdsService {
         logger.info("Получение объявления по id");
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         String auth = authorityRepository.findAuthorityByUsername(username).getAuthority();
-        Ads ads = adsRepository.findAdsByPk(idAds);
-        if (auth.equals("ROLE_USER") && !ads.getSiteUserDetails().getSiteUser().getUsername().equals(username)) {
-            FullAds result = new FullAds();
-            result.setTitle("Not access");
-            return result;
+        Optional<Ads> ads = adsRepository.findById(idAds);
+        if (ads.isEmpty()) {
+            return null;
+        } else {
+            if (auth.equals("ROLE_USER") && !ads.get().getSiteUserDetails().getSiteUser().getUsername().equals(username)) {
+                FullAds result = new FullAds();
+                result.setTitle("Not access");
+                return result;
+            } else {
+                SiteUserDetails userDetails = userRepository.getReferenceById(ads.get().getAuthor());
+                return adsMapper.adsToFullAds(ads.get(), userDetails);
+            }
         }
-        SiteUserDetails userDetails = userRepository.getReferenceById(ads.getAuthor());
-        return adsMapper.adsToFullAds(ads, userDetails);
     }
 
     @Override
@@ -113,15 +122,20 @@ public class AdsServiceImpl implements AdsService {
         logger.info("Изменение объявления по id");
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         String auth = authorityRepository.findAuthorityByUsername(username).getAuthority();
-        Ads adsOld = adsRepository.findAdsByPk(idAds);
-        if (auth.equals("ROLE_USER") && !adsOld.getSiteUserDetails().getSiteUser().getUsername().equals(username)) {
-            AdsDto result = new AdsDto();
-            result.setTitle("Not access");
-            return result;
+        Optional<Ads> adsOld = adsRepository.findById(idAds);
+        if (adsOld.isEmpty()) {
+            return null;
+        } else {
+            if (auth.equals("ROLE_USER") && !adsOld.get().getSiteUserDetails().getSiteUser().getUsername().equals(username)) {
+                AdsDto result = new AdsDto();
+                result.setTitle("Not access");
+                return result;
+            } else {
+                Ads adsNew = adsMapper.adsDtoToAds(adsDto, adsOld.get());
+                adsRepository.save(adsNew);
+                return adsDto;
+            }
         }
-        Ads adsNew = adsMapper.adsDtoToAds(adsDto, adsOld);
-        adsRepository.save(adsNew);
-        return adsDto;
     }
 
     @Override
@@ -132,7 +146,7 @@ public class AdsServiceImpl implements AdsService {
         } else {
             List<AdsDto> list = adsList.stream().map(adsMapper::adsToAdsDto).collect(Collectors.toList());
             ResponseWrapper<AdsDto> result = new ResponseWrapper<>();
-            result.setList(list);
+            result.setResults(list);
             result.setCount(list.size());
             return result;
         }

@@ -8,5 +8,5 @@ import java.util.List;
 public class ResponseWrapper<T> {
 
     private Integer count;
-    private List<T> list;
+    private List<T> results;
 }
