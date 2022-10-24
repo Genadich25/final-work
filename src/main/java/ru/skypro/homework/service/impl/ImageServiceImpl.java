@@ -77,7 +77,7 @@ public class ImageServiceImpl implements ImageService {
 
             Image result = imageRepository.save(newImage);
 
-            ads.setImage(result.getId().toString());
+            ads.setImage("\\ads\\images\\" + result.getId().toString());
             adsRepository.save(ads);
         }
     }
@@ -88,19 +88,12 @@ public class ImageServiceImpl implements ImageService {
 
     @Override
     public Image getImageById(Integer id) {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        String auth = authorityRepository.findAuthorityByUsername(email).getAuthority();
-        logger.info("Request from user {} for getting image with id: {}", email, id);
+        logger.info("Request for getting image with id: {}", id);
         Optional<Image> optionalImage = imageRepository.findById(id);
         if (optionalImage.isEmpty()) {
             return null;
         } else {
-            Image image = optionalImage.get();
-            if (!image.getAds().getSiteUserDetails().getSiteUser().getUsername().equals(email) && auth.equals("ROLE_USER")) {
-                return null;
-            } else {
-                return image;
-            }
+            return optionalImage.get();
         }
     }
 

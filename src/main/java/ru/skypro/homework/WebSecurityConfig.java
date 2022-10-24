@@ -29,7 +29,8 @@ public class WebSecurityConfig implements WebMvcConfigurer {
             "/v3/api-docs",
             "/webjars/**",
             "/login", "/register",
-            "/ads"
+            "/ads",
+            "/ads/images/**"
     };
 
     @Autowired
