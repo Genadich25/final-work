@@ -11,4 +11,6 @@ public interface ImageService {
 
     Image getImageById(Integer id);
 
+    Image updateImage(Integer id, MultipartFile image) throws IOException;
+
 }

@@ -54,7 +54,7 @@ public class AdsController {
 
 
     @GetMapping
-    public ResponseEntity<ResponseWrapper> getAllAds() {
+    public ResponseEntity<ResponseWrapper<AdsDto>> getAllAds() {
         return ResponseEntity.ok(adsService.getAllAds());
     }
 
@@ -104,21 +104,13 @@ public class AdsController {
     })
     @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')")
     @GetMapping(value = "/me")
-    public ResponseEntity getAdsMe(@RequestParam boolean authenticated,
-                                   @RequestParam String authorities,
-                                   @RequestParam Role credentials,
-                                   @RequestParam Integer details,
-                                   @RequestParam String principal) {
-        if (!authenticated) {
-            return ResponseEntity.status(401)
-                    .body("Unauthorized");
-        } else if (credentials != Role.ADMIN || credentials != Role.USER) {
-            return ResponseEntity.status(403)
-                    .body("forbidden");
-        }
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        SiteUser user = userService.findUserByName(username);
-        ResponseWrapper<AdsDto> adsMe = adsService.getAdsMe(details, principal, user);
+    public ResponseEntity getAdsMe(
+//            @RequestParam boolean authenticated,
+//            @RequestParam String authorities,
+//            @RequestParam Role credentials,
+            @RequestParam(required = false) Integer details,
+            @RequestParam(required = false) String principal) {
+        ResponseWrapper<AdsDto> adsMe = adsService.getAdsMe(details, principal);
         if (adsMe == null) {
             return ResponseEntity.status(404)
                     .body("Not Found");
@@ -252,17 +244,58 @@ public class AdsController {
         return ResponseEntity.ok(result);
     }
 
+
+    @GetMapping(value = "/{image}", produces = {MediaType.IMAGE_PNG_VALUE})
     @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')")
-    @GetMapping(value = "/images/{id}", produces = {MediaType.IMAGE_PNG_VALUE})
-    public ResponseEntity<byte[]> getImage(@PathVariable Integer id) {
-        Image image = imageService.getImageById(id);
-        if (image == null) {
+    public ResponseEntity<byte[]> getImage(@PathVariable Integer image) {
+        Image imageById = imageService.getImageById(image);
+        if (imageById == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.parseMediaType(image.getMediaType()));
-        headers.setContentLength(image.getData().length);
-        return ResponseEntity.status(HttpStatus.OK).headers(headers).body(image.getData());
+        headers.setContentType(MediaType.parseMediaType(imageById.getMediaType()));
+        headers.setContentLength(imageById.getData().length);
+        return ResponseEntity.status(HttpStatus.OK).headers(headers).body(imageById.getData());
+    }
+
+
+    @PatchMapping(value = "/{id}/image", produces = {MediaType.IMAGE_PNG_VALUE})
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')")
+    public ResponseEntity<byte[]> updateImage(@PathVariable Integer id,
+                                              @RequestPart("image") @Valid @NotNull @NotBlank MultipartFile image) throws IOException {
+
+        Image image1 = imageService.updateImage(id, image);
+
+        if (image1 == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.parseMediaType(image1.getMediaType()));
+        headers.setContentLength(image1.getData().length);
+        return ResponseEntity.status(HttpStatus.OK).headers(headers).body(image1.getData());
+    }
+
+
+    @GetMapping("/adsTitleContains")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')")
+    public ResponseEntity<ResponseWrapper<AdsDto>> getAdsWithTitleContainsText(@RequestParam ("text") String text) {
+        ResponseWrapper<AdsDto> result = adsService.getAdsWithTitleContainsText(text);
+        if (result == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        return ResponseEntity.ok(result);
+    }
+
+
+    @GetMapping("/commentContains")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')")
+    public ResponseEntity<ResponseWrapper<CommentDto>> getAdsCommentsWithText(@RequestParam ("text") String text) {
+        ResponseWrapper<CommentDto> result = commentService.getCommentWithText(text);
+        if (result == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        return ResponseEntity.ok(result);
     }
 
 

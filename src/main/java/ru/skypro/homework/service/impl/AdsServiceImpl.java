@@ -53,16 +53,42 @@ public class AdsServiceImpl implements AdsService {
     }
 
     @Override
-    public ResponseWrapper<AdsDto> getAdsMe(Integer price, String title, SiteUser user) {
-        logger.info("Получние объявлений пренадлежащих пользователю");
-        List<Ads> adsMe = adsRepository.findByAuthorAndPriceAndTitle(user.getSiteUserDetails().getId(), price, title);
-        List<AdsDto> result = adsMe.stream()
-                .map(adsMapper::adsToAdsDto)
-                .collect(Collectors.toList());
-        ResponseWrapper<AdsDto> adsDtoResponseWrapper = new ResponseWrapper<>();
-        adsDtoResponseWrapper.setCount(result.size());
-        adsDtoResponseWrapper.setResults(result);
-        return adsDtoResponseWrapper;
+    public ResponseWrapper<AdsDto> getAdsMe(Integer price, String title) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        logger.info("Request for getting all ads of user with username {}", email);
+        Optional<SiteUser> optionalSiteUser = siteUserRepository.findSiteUserByUsername(email);
+        if (optionalSiteUser.isPresent()) {
+            Integer idUser = optionalSiteUser.get().getSiteUserDetails().getId();
+            List<AdsDto> list = adsRepository.findAdsBySiteUserDetailsId(idUser)
+                    .stream()
+                    .map(adsMapper::adsToAdsDto)
+                    .collect(Collectors.toList());
+            if (price != null && title == null) {
+                list = adsRepository.findAllBySiteUserDetailsIdAndPrice(idUser, price)
+                        .stream()
+                        .map(adsMapper::adsToAdsDto)
+                        .collect(Collectors.toList());
+            }
+            if (title != null && price == null) {
+                list = adsRepository.findAllBySiteUserDetailsIdAndTitleContains(idUser, title)
+                        .stream()
+                        .map(adsMapper::adsToAdsDto)
+                        .collect(Collectors.toList());
+            }
+            if (title != null && price != null) {
+                list = adsRepository.findAllBySiteUserDetailsIdAndPriceAndTitleContains(idUser, price, title)
+                        .stream()
+                        .map(adsMapper::adsToAdsDto)
+                        .collect(Collectors.toList());
+            }
+            ResponseWrapper<AdsDto> responseWrapperDto = new ResponseWrapper<>();
+            responseWrapperDto.setResults(list);
+            responseWrapperDto.setCount(list.size());
+            return responseWrapperDto;
+        } else {
+            return null;
+        }
+
     }
 
     @Override
@@ -84,7 +110,7 @@ public class AdsServiceImpl implements AdsService {
         logger.info("Удаление объявления по id");
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         String auth = authorityRepository.findAuthorityByUsername(username).getAuthority();
-        Optional <Ads> ads = adsRepository.findById(idAds);
+        Optional<Ads> ads = adsRepository.findById(idAds);
         if (ads.isEmpty()) {
             return null;
         } else {
@@ -99,7 +125,7 @@ public class AdsServiceImpl implements AdsService {
 
     @Override
     public FullAds getAds(Integer idAds) {
-        logger.info("Получение объявления по id");
+        logger.info("Получение полной информации об объявлении по id");
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         String auth = authorityRepository.findAuthorityByUsername(username).getAuthority();
         Optional<Ads> ads = adsRepository.findById(idAds);
