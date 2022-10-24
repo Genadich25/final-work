@@ -5,14 +5,21 @@ import org.springframework.stereotype.Repository;
 import ru.skypro.homework.entities.Ads;
 
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface AdsRepository extends JpaRepository<Ads, Integer> {
 
     Ads findAdsById(Integer id);
 
-    List<Ads> findByAuthorAndPriceAndTitle(Integer author, Integer price, String title);
+    List<Ads> findAdsBySiteUserDetailsId(Integer siteUserId);
+
+    List<Ads> findAllBySiteUserDetailsIdAndPrice(Integer id, Integer price);
+
+
+    List<Ads> findAllBySiteUserDetailsIdAndTitleContains(Integer id, String text);
+
+
+    List<Ads> findAllBySiteUserDetailsIdAndPriceAndTitleContains(Integer id, Integer price, String title);
 
     List<Ads> findAdsByTitleContains(String text);
 }
