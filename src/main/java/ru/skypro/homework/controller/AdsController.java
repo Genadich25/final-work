@@ -245,8 +245,7 @@ public class AdsController {
     }
 
 
-    @GetMapping(value = "/{image}", produces = {MediaType.IMAGE_PNG_VALUE})
-    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')")
+    @GetMapping(value = "/images/{image}", produces = {MediaType.IMAGE_PNG_VALUE})
     public ResponseEntity<byte[]> getImage(@PathVariable Integer image) {
         Image imageById = imageService.getImageById(image);
         if (imageById == null) {
