@@ -1,14 +1,13 @@
 package ru.skypro.homework.mappers;
 
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.factory.Mappers;
 import ru.skypro.homework.dto.CommentDto;
 import ru.skypro.homework.entities.Comment;
 
-
+/**
+ * Interface included methods for converting entity ads comment to dto and back again
+ */
 public interface CommentMapper {
-    Comment commentDtoToComment(CommentDto commentDto);
+    Comment commentDtoToComment(CommentDto commentDto, Comment comment);
 
     CommentDto commentToCommentDto(Comment comment);
 }

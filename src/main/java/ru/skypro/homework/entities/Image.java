@@ -5,6 +5,9 @@ import lombok.Setter;
 
 import javax.persistence.*;
 
+/**
+ * Class contains entity of image
+ */
 @Getter
 @Setter
 @Entity

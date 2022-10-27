@@ -8,6 +8,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.entities.Ads;
 import ru.skypro.homework.entities.Image;
+import ru.skypro.homework.exceptionsHandler.exceptions.ImageNotFoundException;
+import ru.skypro.homework.exceptionsHandler.exceptions.NotAccessActionException;
+import ru.skypro.homework.exceptionsHandler.exceptions.ServerErrorException;
 import ru.skypro.homework.repositories.AdsRepository;
 import ru.skypro.homework.repositories.AuthorityRepository;
 import ru.skypro.homework.repositories.ImageRepository;
@@ -24,6 +27,9 @@ import java.util.Optional;
 
 import static java.nio.file.StandardOpenOption.CREATE_NEW;
 
+/**
+ * Class implements methods for working with entity image
+ */
 @Service
 public class ImageServiceImpl implements ImageService {
 
@@ -43,8 +49,9 @@ public class ImageServiceImpl implements ImageService {
         this.authorityRepository = authorityRepository;
     }
 
+//    Method for uploading image of new ad
     @Override
-    public void uploadImage(MultipartFile image, String email, Integer id) throws IOException {
+    public String uploadImage(MultipartFile image, String email, Integer id) throws IOException {
 
         logger.info("Request from user {} for uploading image", email);
 
@@ -77,8 +84,13 @@ public class ImageServiceImpl implements ImageService {
 
             Image result = imageRepository.save(newImage);
 
+
             ads.setImage("\\ads\\images\\" + result.getId().toString());
             adsRepository.save(ads);
+
+            return result.getId().toString();
+        } else {
+            throw new ServerErrorException();
         }
     }
 
@@ -86,18 +98,20 @@ public class ImageServiceImpl implements ImageService {
         return fileName.substring(fileName.lastIndexOf(".") + 1);
     }
 
+//    Search image by id
     @Override
     public Image getImageById(Integer id) {
         logger.info("Request for getting image with id: {}", id);
         Optional<Image> optionalImage = imageRepository.findById(id);
-        if (optionalImage.isEmpty()) {
-            return null;
-        } else {
+        if (optionalImage.isPresent()) {
             return optionalImage.get();
+        } else {
+            throw new ImageNotFoundException();
         }
     }
 
 
+//    Method for updating image existed
     @Override
     public Image updateImage(Integer id, MultipartFile image) throws IOException {
 
@@ -107,12 +121,13 @@ public class ImageServiceImpl implements ImageService {
         logger.info("Request from user {} for updating image with id: {}", email, id);
 
         Optional<Image> optionalImage = imageRepository.findById(id);
+
         if (optionalImage.isPresent()) {
 
             Image image1 = optionalImage.get();
 
             if (!image1.getAds().getSiteUserDetails().getSiteUser().getUsername().equals(email) && auth.equals("ROLE_USER")) {
-                return null;
+                throw new NotAccessActionException();
             } else {
                 String filePath = image1.getFilePath();
 
@@ -134,7 +149,7 @@ public class ImageServiceImpl implements ImageService {
                 return imageRepository.save(image1);
             }
         } else {
-            return null;
+            throw new ImageNotFoundException();
         }
     }
 

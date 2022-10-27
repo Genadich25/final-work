@@ -2,7 +2,6 @@ package ru.skypro.homework.service.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -11,17 +10,22 @@ import ru.skypro.homework.dto.ResponseWrapper;
 import ru.skypro.homework.dto.UserDto;
 import ru.skypro.homework.entities.SiteUser;
 import ru.skypro.homework.entities.SiteUserDetails;
+import ru.skypro.homework.exceptionsHandler.exceptions.IncorrectPasswordException;
+import ru.skypro.homework.exceptionsHandler.exceptions.NotAccessException;
+import ru.skypro.homework.exceptionsHandler.exceptions.UserNotFoundException;
 import ru.skypro.homework.mappers.UserMapper;
 import ru.skypro.homework.repositories.AuthorityRepository;
 import ru.skypro.homework.repositories.SiteUserRepository;
 import ru.skypro.homework.repositories.UserDetailsRepository;
 import ru.skypro.homework.service.UserService;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Class implements methods for working with entity site user and site user details
+ */
 @Service
 public class UserServiceImpl implements UserService {
 
@@ -42,67 +46,57 @@ public class UserServiceImpl implements UserService {
         this.authorityRepository = authorityRepository;
     }
 
+
+//    Method for getting list of users
     @Override
     public ResponseWrapper<UserDto> getUsers() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         String role = authorityRepository.findAuthorityByUsername(email).getAuthority();
         logger.info("Request for getting list of all users from userName: {}, with role: {}", email, role);
-        List<SiteUserDetails> siteUsers = userDetails.findAll();
+        List<UserDto> siteUsers = userDetails.findAll().stream().map(userMapper::fromSiteUserToUserDto).collect(Collectors.toList());
         if (role.equals("ROLE_USER")) {
-            List<UserDto> oneUser = siteUsers.stream()
-                    .filter(siteUserDetails -> siteUserDetails.getSiteUser().getUsername().equals(email))
-                    .map(userMapper::fromSiteUserToUserDto)
-                    .collect(Collectors.toList());
-            ResponseWrapper<UserDto> result = new ResponseWrapper<>();
-            result.setResults(oneUser);
-            result.setCount(oneUser.size());
-            return result;
-        }
-        List<UserDto> result = new ArrayList<>();
-        for (SiteUserDetails user : siteUsers) {
-            result.add(userMapper.fromSiteUserToUserDto(user));
+            siteUsers = userDetails.findSiteUserDetailsBySiteUserUsername(email).stream().map(userMapper::fromSiteUserToUserDto).collect(Collectors.toList());
         }
         ResponseWrapper<UserDto> responseWrapperDto = new ResponseWrapper<>();
-        responseWrapperDto.setResults(result);
-        responseWrapperDto.setCount(result.size());
+        responseWrapperDto.setResults(siteUsers);
+        responseWrapperDto.setCount(siteUsers.size());
         return responseWrapperDto;
     }
 
+
+
+//    Method for updating data of one authorized user
     @Override
     public UserDto updateUser(UserDto userDto, String email) {
-        logger.info("Request for updating user with userName: {}", email);
-        Optional<SiteUser> siteUser = siteUserRepository.findSiteUserByUsername(email);
-        if (siteUser.isEmpty()) {
-            logger.info("There is not user with username {} in list of users", email);
-            return null;
-        } else {
-            SiteUser user = userMapper.fromUserDtoToSiteUser(siteUser.get(), userDto);
-            logger.info("Changes are finished");
-            return userMapper.fromSiteUserToUserDto(siteUserRepository.save(user).getSiteUserDetails());
-        }
+        String role = authorityRepository.findAuthorityByUsername(email).getAuthority();
+        logger.info("Request for updating user with username: {}, with role: {}", email, role);
+        SiteUser siteUser = siteUserRepository.findByUsername(email);
+        SiteUser user = userMapper.fromUserDtoToSiteUser(siteUser, userDto);
+        logger.info("Changes are finished");
+        SiteUser result = siteUserRepository.save(user);
+        return userMapper.fromSiteUserToUserDto(result.getSiteUserDetails());
     }
 
+
+
+//     Method for change password of one authorized user
     @Override
-    public NewPasswordDto setPassword(NewPasswordDto password, Authentication auth) {
-        Optional<SiteUser> userOptional = siteUserRepository.findSiteUserByUsername(auth.getName());
-        if (userOptional.isEmpty()) {
-            logger.info("Пользователя с таким email: *** \"{}\" *** нет.", auth.getName());
-            return null;
+    public NewPasswordDto setPassword(NewPasswordDto password, String email) {
+        SiteUser result = siteUserRepository.findByUsername(email);
+        logger.info("Request for change password of user: \"{}\"", email);
+        if (!passwordEncoder.matches(password.getCurrentPassword(), result.getPassword())) {
+            logger.info("Введеный пароль: {} не соответствует текущему паролю: {}. Изменение пароля запрещено", password.getCurrentPassword(), result.getPassword());
+            throw new IncorrectPasswordException();
         } else {
-            SiteUser result = userOptional.get();
-            logger.info("Request for change password of user: \"{}\" from email: {}", result.getUsername(), auth.getName());
-            if (!passwordEncoder.matches(password.getCurrentPassword(), result.getPassword())) {
-                logger.info("Введеный пароль: {} не соответствует текущему паролю: {}. Изменение пароля запрещено", password.getCurrentPassword(), result.getPassword());
-                return null;
-            } else {
-                logger.info("Введеный пароль и текущий пароль совпадают. Изменение пароля допускается.");
-                result.setPassword(passwordEncoder.encode(password.getNewPassword()));
-                siteUserRepository.save(result);
-                return password;
-            }
+            logger.info("Введеный пароль и текущий пароль совпадают. Изменение пароля разрешено");
+            result.setPassword(passwordEncoder.encode(password.getNewPassword()));
+            siteUserRepository.save(result);
+            return password;
         }
     }
 
+
+//    Method for getting info about one user by id
     @Override
     public UserDto getUser(Integer id) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -110,20 +104,17 @@ public class UserServiceImpl implements UserService {
         logger.info("Request for getting information about user with id {} from userName: {}", id, email);
         Optional<SiteUserDetails> siteUser = userDetails.findById(id);
         if (siteUser.isEmpty()) {
-            return null;
+            throw new UserNotFoundException();
         } else {
-            if ((siteUser.get().getSiteUser().getUsername().equals(email) && role.equals("ROLE_USER")) || role.equals("ROLE_ADMIN")) {
-                return userMapper.fromSiteUserToUserDto(siteUser.get());
+            if (!siteUser.get().getSiteUser().getUsername().equals(email) && role.equals("ROLE_USER")) {
+                throw new NotAccessException();
             } else {
-                UserDto userDto = new UserDto();
-                userDto.setFirstName("Not access");
-                return userDto;
+                return userMapper.fromSiteUserToUserDto(siteUser.get());
             }
         }
     }
 
-    @Override
-    public SiteUser findUserByName(String name) {
-        return siteUserRepository.findSiteUserByUsername(name).orElseThrow();
-    }
+
+
+
 }

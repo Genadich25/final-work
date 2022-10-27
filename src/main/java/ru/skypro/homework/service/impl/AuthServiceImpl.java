@@ -13,6 +13,9 @@ import ru.skypro.homework.entities.SiteUserDetails;
 import ru.skypro.homework.repositories.SiteUserRepository;
 import ru.skypro.homework.service.AuthService;
 
+/**
+ * Class implements methods for user's registration and authorization of access
+ */
 @Service
 public class AuthServiceImpl implements AuthService {
 
@@ -26,6 +29,7 @@ public class AuthServiceImpl implements AuthService {
         this.passwordEncoder = new BCryptPasswordEncoder();
     }
 
+//     Method for authorization of access
     @Override
     public boolean login(String userName, String password) {
         if (!manager.userExists(userName)) {
@@ -36,6 +40,7 @@ public class AuthServiceImpl implements AuthService {
         return passwordEncoder.matches(password, encryptedPassword);
     }
 
+//    Method for registration new user
     @Override
     public boolean register(RegisterReq registerReq, Role role) {
         if (manager.userExists(registerReq.getUsername())) {
@@ -58,4 +63,6 @@ public class AuthServiceImpl implements AuthService {
             return true;
         }
     }
+
+
 }

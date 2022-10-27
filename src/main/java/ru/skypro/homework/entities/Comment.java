@@ -5,6 +5,9 @@ import lombok.Data;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
+/**
+ * Class contains entity of comment
+ */
 @Entity
 @Data
 @Table(name = "comments")

@@ -19,6 +19,9 @@ import javax.sql.DataSource;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
+/**
+ * Configuration class for web security
+ */
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig implements WebMvcConfigurer {
