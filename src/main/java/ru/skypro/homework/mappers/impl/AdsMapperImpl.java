@@ -8,19 +8,35 @@ import ru.skypro.homework.entities.Ads;
 import ru.skypro.homework.entities.SiteUserDetails;
 import ru.skypro.homework.mappers.AdsMapper;
 
+/**
+ * Class implements methods for converting entity ads to dto and back again
+ */
 @Service
 public class AdsMapperImpl implements AdsMapper {
+
+//    method converts from ads entity to ads dto
     @Override
     public AdsDto adsToAdsDto(Ads ads) {
         AdsDto adsDto = new AdsDto();
-        adsDto.setPk(ads.getId());
-        adsDto.setAuthor(ads.getAuthor());
-        adsDto.setImage(ads.getImage());
-        adsDto.setTitle(ads.getTitle());
-        adsDto.setPrice(ads.getPrice());
+        if (ads.getId() != null) {
+            adsDto.setPk(ads.getId());
+        }
+        if (ads.getAuthor() != null) {
+            adsDto.setAuthor(ads.getAuthor());
+        }
+        if (ads.getImage() != null) {
+            adsDto.setImage(ads.getImage());
+        }
+        if (ads.getTitle() != null) {
+            adsDto.setTitle(ads.getTitle());
+        }
+        if (ads.getPrice() != null) {
+            adsDto.setPrice(ads.getPrice());
+        }
         return adsDto;
     }
 
+//     method converts from ads dto to ads entity
     @Override
     public Ads adsDtoToAds(AdsDto adsDto, Ads ads) {
         if (adsDto.getTitle() != null) {
@@ -32,28 +48,20 @@ public class AdsMapperImpl implements AdsMapper {
         return ads;
     }
 
+//     method converts from create ads dto to ads entity
     @Override
     public Ads adsToCreateAdsDto(CreateAdsDto createAdsDto) {
         Ads ads = new Ads();
-        ads.setId(createAdsDto.getPk());
-        ads.setImage(createAdsDto.getImage());
+        if (createAdsDto.getImage() != null) {
+            ads.setImage(createAdsDto.getImage());
+        }
         ads.setTitle(createAdsDto.getTitle());
         ads.setPrice(createAdsDto.getPrice());
         ads.setDescription(createAdsDto.getDescription());
         return ads;
     }
 
-    @Override
-    public CreateAdsDto createAdsDtoToAds(Ads ads) {
-        CreateAdsDto createAdsDto = new CreateAdsDto();
-        createAdsDto.setPk(ads.getId());
-        createAdsDto.setImage(ads.getImage());
-        createAdsDto.setTitle(ads.getTitle());
-        createAdsDto.setPrice(ads.getPrice());
-        createAdsDto.setDescription(ads.getDescription());
-        return createAdsDto;
-    }
-
+//    method converts from ads entity and site user details entity to full ads dto
     @Override
     public FullAds adsToFullAds(Ads ads, SiteUserDetails user) {
         FullAds fullAds = new FullAds();

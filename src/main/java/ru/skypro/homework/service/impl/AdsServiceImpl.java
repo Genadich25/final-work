@@ -7,51 +7,61 @@ import org.springframework.stereotype.Service;
 import ru.skypro.homework.dto.*;
 import ru.skypro.homework.entities.Ads;
 import ru.skypro.homework.entities.SiteUser;
-import ru.skypro.homework.entities.SiteUserDetails;
+import ru.skypro.homework.exceptionsHandler.exceptions.AdsNotFoundException;
+import ru.skypro.homework.exceptionsHandler.exceptions.EmptyListException;
+import ru.skypro.homework.exceptionsHandler.exceptions.NotAccessActionException;
+import ru.skypro.homework.exceptionsHandler.exceptions.NotAccessException;
 import ru.skypro.homework.mappers.impl.AdsMapperImpl;
 import ru.skypro.homework.repositories.AdsRepository;
 import ru.skypro.homework.repositories.AuthorityRepository;
 import ru.skypro.homework.repositories.SiteUserRepository;
-import ru.skypro.homework.repositories.UserDetailsRepository;
 import ru.skypro.homework.service.AdsService;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Class implements methods for working with ads
+ */
 @Service
 public class AdsServiceImpl implements AdsService {
 
     Logger logger = LoggerFactory.getLogger(AdsServiceImpl.class);
 
     private final AdsRepository adsRepository;
-    private final UserDetailsRepository userRepository;
     private final SiteUserRepository siteUserRepository;
     private final AdsMapperImpl adsMapper;
     private final AuthorityRepository authorityRepository;
 
-    public AdsServiceImpl(AdsRepository adsRepository, UserDetailsRepository userRepository, SiteUserRepository siteUserRepository,
+    public AdsServiceImpl(AdsRepository adsRepository, SiteUserRepository siteUserRepository,
                           AdsMapperImpl adsMapper, AuthorityRepository authorityRepository) {
         this.adsRepository = adsRepository;
-        this.userRepository = userRepository;
         this.siteUserRepository = siteUserRepository;
         this.adsMapper = adsMapper;
         this.authorityRepository = authorityRepository;
     }
 
+//    method for getting all ads from database
     @Override
     public ResponseWrapper<AdsDto> getAllAds() {
-        logger.info("Получаем список всех объявлений");
-        List<Ads> allAds = adsRepository.findAll();
-        List<AdsDto> result = allAds.stream()
-                .map(adsMapper::adsToAdsDto)
-                .collect(Collectors.toList());
-        ResponseWrapper<AdsDto> adsDtoResponseWrapper = new ResponseWrapper<>();
-        adsDtoResponseWrapper.setCount(result.size());
-        adsDtoResponseWrapper.setResults(result);
-        return adsDtoResponseWrapper;
+        logger.info("Request for getting all ads from data base");
+        List<Ads> adsList = adsRepository.findAll();
+        if (adsList.isEmpty()) {
+            throw new EmptyListException();
+        }
+        List<AdsDto> adsDtoList = new ArrayList<>();
+        for (Ads ads : adsList) {
+            adsDtoList.add(adsMapper.adsToAdsDto(ads));
+        }
+        ResponseWrapper<AdsDto> responseWrapperDto = new ResponseWrapper<>();
+        responseWrapperDto.setResults(adsDtoList);
+        responseWrapperDto.setCount(adsDtoList.size());
+        return responseWrapperDto;
     }
 
+//    Method for getting all ads of one authorized user
     @Override
     public ResponseWrapper<AdsDto> getAdsMe(Integer price, String title) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -81,16 +91,20 @@ public class AdsServiceImpl implements AdsService {
                         .map(adsMapper::adsToAdsDto)
                         .collect(Collectors.toList());
             }
-            ResponseWrapper<AdsDto> responseWrapperDto = new ResponseWrapper<>();
-            responseWrapperDto.setResults(list);
-            responseWrapperDto.setCount(list.size());
-            return responseWrapperDto;
+            if (list.isEmpty()) {
+                throw new EmptyListException();
+            } else {
+                ResponseWrapper<AdsDto> responseWrapperDto = new ResponseWrapper<>();
+                responseWrapperDto.setResults(list);
+                responseWrapperDto.setCount(list.size());
+                return responseWrapperDto;
+            }
         } else {
-            return null;
+            throw new NotAccessException();
         }
-
     }
 
+//    method for creating ads
     @Override
     public AdsDto addAds(CreateAdsDto createAdsDto, String email) {
         logger.info("Create new ad by user with username: {}", email);
@@ -105,70 +119,70 @@ public class AdsServiceImpl implements AdsService {
         }
     }
 
+//    Method remove ad by id
     @Override
     public String removeAds(Integer idAds) {
-        logger.info("Удаление объявления по id");
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        String auth = authorityRepository.findAuthorityByUsername(username).getAuthority();
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        String role = authorityRepository.findAuthorityByUsername(email).getAuthority();
+        logger.info("Request from user with username: \"{}\" for deleting ad with id {}", email, idAds);
         Optional<Ads> ads = adsRepository.findById(idAds);
         if (ads.isEmpty()) {
-            return null;
+            throw new AdsNotFoundException();
         } else {
-            if (auth.equals("ROLE_USER") && !ads.get().getSiteUserDetails().getSiteUser().getUsername().equals(username)) {
-                return "Not access";
+            Ads deletedAds = ads.get();
+            if (role.equals("ROLE_USER") && !deletedAds.getSiteUserDetails().getSiteUser().getUsername().equals(email)) {
+                throw new NotAccessActionException();
             } else {
-                adsRepository.delete(ads.get());
-                return "Обявление" + ads + "удалено";
+                adsRepository.delete(deletedAds);
+                return "SUCCESS";
             }
         }
     }
 
+//     Method for getting full info about ad by id
     @Override
     public FullAds getAds(Integer idAds) {
-        logger.info("Получение полной информации об объявлении по id");
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        String auth = authorityRepository.findAuthorityByUsername(username).getAuthority();
-        Optional<Ads> ads = adsRepository.findById(idAds);
-        if (ads.isEmpty()) {
-            return null;
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        String role = authorityRepository.findAuthorityByUsername(email).getAuthority();
+        logger.info("Request from user with username: \"{}\" for getting full info about ads with id {}", email, idAds);
+        Optional<Ads> adsOptional = adsRepository.findById(idAds);
+        if (adsOptional.isEmpty()) {
+            throw new AdsNotFoundException();
         } else {
-            if (auth.equals("ROLE_USER") && !ads.get().getSiteUserDetails().getSiteUser().getUsername().equals(username)) {
-                FullAds result = new FullAds();
-                result.setTitle("Not access");
-                return result;
+            Ads result = adsOptional.get();
+            if (role.equals("ROLE_USER") && !result.getSiteUserDetails().getSiteUser().getUsername().equals(email)) {
+                throw new NotAccessException();
             } else {
-                SiteUserDetails userDetails = userRepository.getReferenceById(ads.get().getAuthor());
-                return adsMapper.adsToFullAds(ads.get(), userDetails);
+                return adsMapper.adsToFullAds(result, result.getSiteUserDetails());
             }
         }
     }
 
+//    Method for updating ad
     @Override
     public AdsDto updateAds(Integer idAds, AdsDto adsDto) {
-        logger.info("Изменение объявления по id");
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        String auth = authorityRepository.findAuthorityByUsername(username).getAuthority();
-        Optional<Ads> adsOld = adsRepository.findById(idAds);
-        if (adsOld.isEmpty()) {
-            return null;
+        String role = authorityRepository.findAuthorityByUsername(username).getAuthority();
+        logger.info("Request for updating ad with id {} from user with username: \"{}\"", idAds, username);
+        Optional<Ads> optionalAds = adsRepository.findById(idAds);
+        if (optionalAds.isEmpty()) {
+            throw new AdsNotFoundException();
         } else {
-            if (auth.equals("ROLE_USER") && !adsOld.get().getSiteUserDetails().getSiteUser().getUsername().equals(username)) {
-                AdsDto result = new AdsDto();
-                result.setTitle("Not access");
-                return result;
+            if (role.equals("ROLE_USER") && !optionalAds.get().getSiteUserDetails().getSiteUser().getUsername().equals(username)) {
+                throw new NotAccessActionException();
             } else {
-                Ads adsNew = adsMapper.adsDtoToAds(adsDto, adsOld.get());
-                adsRepository.save(adsNew);
-                return adsDto;
+                Ads result = adsMapper.adsDtoToAds(adsDto, optionalAds.get());
+                return adsMapper.adsToAdsDto(adsRepository.save(result));
             }
         }
     }
 
+//    Method for getting ads with title contained text
     @Override
     public ResponseWrapper<AdsDto> getAdsWithTitleContainsText(String text) {
         List<Ads> adsList = adsRepository.findAdsByTitleContains(text);
         if (adsList.isEmpty()) {
-            return null;
+            throw new EmptyListException();
         } else {
             List<AdsDto> list = adsList.stream().map(adsMapper::adsToAdsDto).collect(Collectors.toList());
             ResponseWrapper<AdsDto> result = new ResponseWrapper<>();

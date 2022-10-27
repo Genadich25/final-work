@@ -2,6 +2,9 @@ package ru.skypro.homework.entities;
 
 import javax.persistence.*;
 
+/**
+ * Class contains entity of user
+ */
 @Entity
 @Table(name = "users")
 public class SiteUser {

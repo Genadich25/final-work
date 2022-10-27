@@ -8,11 +8,15 @@ import ru.skypro.homework.entities.SiteUser;
 import ru.skypro.homework.entities.SiteUserDetails;
 import ru.skypro.homework.mappers.UserMapper;
 
+/**
+ * Class implements methods for converting site user entity to user dto and back again
+ */
 @Service
 public class UserMapperImpl implements UserMapper {
 
     Logger logger = LoggerFactory.getLogger(UserMapperImpl.class);
 
+//    method converts from user dto to site user entity and site user details entity
     @Override
     public SiteUser fromUserDtoToSiteUser(SiteUser siteUser, UserDto userDto) {
         SiteUserDetails userDetails = siteUser.getSiteUserDetails();
@@ -32,6 +36,7 @@ public class UserMapperImpl implements UserMapper {
         return siteUser;
     }
 
+//    method converts from site user details entity to user dto
     @Override
     public UserDto fromSiteUserToUserDto(SiteUserDetails user) {
         UserDto userDto = new UserDto();

@@ -4,6 +4,9 @@ import javax.persistence.*;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Class contains entity of user's info
+ */
 @Entity
 @Table(name = "user_details")
 public class SiteUserDetails {

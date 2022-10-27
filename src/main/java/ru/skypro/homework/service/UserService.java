@@ -1,22 +1,43 @@
 package ru.skypro.homework.service;
 
-import org.springframework.security.core.Authentication;
 import ru.skypro.homework.dto.NewPasswordDto;
 import ru.skypro.homework.dto.ResponseWrapper;
 import ru.skypro.homework.dto.UserDto;
-import ru.skypro.homework.entities.SiteUser;
 
+/**
+ * Interface including methods for working with entities site user and site user details
+ */
 public interface UserService {
 
+    /**
+     * Method for getting list of users
+     *
+     * @return ResponseWrapperDto<UserDto></UserDto>
+     */
     ResponseWrapper<UserDto> getUsers();
 
+
+    /**
+     * Method for updating data of one authorized user
+     *
+     * @return UserDto
+     */
     UserDto updateUser(UserDto user, String email);
 
-    NewPasswordDto setPassword(NewPasswordDto password, Authentication auth);
 
+    /**
+     * Method for change password of one authorized user
+     *
+     * @return NewPasswordDto
+     */
+    NewPasswordDto setPassword(NewPasswordDto password, String email);
+
+    /**
+     * Method for getting info about one user by id
+     *
+     * @return UserDto
+     */
     UserDto getUser(Integer id);
-
-    SiteUser findUserByName(String name);
 
 
 }
