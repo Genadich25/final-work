@@ -37,7 +37,8 @@ public class UserController {
     @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')")
     @GetMapping("/me")
     public ResponseEntity<ResponseWrapper<UserDto>> getUsers() {
-        ResponseWrapper<UserDto> result = userService.getUsers();
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        ResponseWrapper<UserDto> result = userService.getUsers(email);
         return ResponseEntity.ok(result);
     }
 
@@ -102,7 +103,8 @@ public class UserController {
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER')")
     @GetMapping("{id}")
     public ResponseEntity<UserDto> getUser(@PathVariable Integer id) {
-        UserDto result = userService.getUser(id);
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        UserDto result = userService.getUser(id, email);
         return ResponseEntity.ok(result);
     }
 

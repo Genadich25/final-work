@@ -14,7 +14,7 @@ public interface UserService {
      *
      * @return ResponseWrapperDto<UserDto></UserDto>
      */
-    ResponseWrapper<UserDto> getUsers();
+    ResponseWrapper<UserDto> getUsers(String email);
 
 
     /**
@@ -37,7 +37,7 @@ public interface UserService {
      *
      * @return UserDto
      */
-    UserDto getUser(Integer id);
+    UserDto getUser(Integer id, String email);
 
 
 }

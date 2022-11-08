@@ -2,7 +2,6 @@ package ru.skypro.homework.service.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.skypro.homework.dto.NewPasswordDto;
@@ -49,8 +48,7 @@ public class UserServiceImpl implements UserService {
 
 //    Method for getting list of users
     @Override
-    public ResponseWrapper<UserDto> getUsers() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+    public ResponseWrapper<UserDto> getUsers(String email) {
         String role = authorityRepository.findAuthorityByUsername(email).getAuthority();
         logger.info("Request for getting list of all users from userName: {}, with role: {}", email, role);
         List<UserDto> siteUsers = userDetails.findAll().stream().map(userMapper::fromSiteUserToUserDto).collect(Collectors.toList());
@@ -98,8 +96,7 @@ public class UserServiceImpl implements UserService {
 
 //    Method for getting info about one user by id
     @Override
-    public UserDto getUser(Integer id) {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+    public UserDto getUser(Integer id, String email) {
         String role = authorityRepository.findAuthorityByUsername(email).getAuthority();
         logger.info("Request for getting information about user with id {} from userName: {}", id, email);
         Optional<SiteUserDetails> siteUser = userDetails.findById(id);
