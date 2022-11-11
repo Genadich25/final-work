@@ -2,7 +2,7 @@ package com.curs.finalwork;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -29,11 +29,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @AutoConfigureMockMvc
 @WebMvcTest(AdsController.class)
+@DataJpaTest
 public class AdsControllerTest {
 
-    @Autowired
     private AdsMapper adsMapper;
-    @Autowired
     private MockMvc mockMvc;
 
     @MockBean
@@ -44,7 +43,6 @@ public class AdsControllerTest {
 
     @MockBean
     private AdsRepository adsRepository;
-
 
     @SpyBean
     private AdsServiceImpl adsService;
