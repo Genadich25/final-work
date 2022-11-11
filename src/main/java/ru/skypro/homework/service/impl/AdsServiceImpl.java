@@ -4,7 +4,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import ru.skypro.homework.dto.*;
+import ru.skypro.homework.dto.AdsDto;
+import ru.skypro.homework.dto.CreateAdsDto;
+import ru.skypro.homework.dto.FullAds;
+import ru.skypro.homework.dto.ResponseWrapper;
 import ru.skypro.homework.entities.Ads;
 import ru.skypro.homework.entities.SiteUser;
 import ru.skypro.homework.exceptionsHandler.exceptions.AdsNotFoundException;
@@ -17,7 +20,6 @@ import ru.skypro.homework.repositories.AuthorityRepository;
 import ru.skypro.homework.repositories.SiteUserRepository;
 import ru.skypro.homework.service.AdsService;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -51,10 +53,9 @@ public class AdsServiceImpl implements AdsService {
         if (adsList.isEmpty()) {
             throw new EmptyListException();
         }
-        List<AdsDto> adsDtoList = new ArrayList<>();
-        for (Ads ads : adsList) {
-            adsDtoList.add(adsMapper.adsToAdsDto(ads));
-        }
+        List<AdsDto> adsDtoList = adsList.stream()
+                .map(s -> adsMapper.adsToAdsDto(s))
+                .collect(Collectors.toList());
         ResponseWrapper<AdsDto> responseWrapperDto = new ResponseWrapper<>();
         responseWrapperDto.setResults(adsDtoList);
         responseWrapperDto.setCount(adsDtoList.size());
