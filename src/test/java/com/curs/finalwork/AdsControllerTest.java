@@ -1,5 +1,6 @@
 package com.curs.finalwork;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -23,6 +24,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -32,6 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @DataJpaTest
 public class AdsControllerTest {
 
+    private Ads ads;
     private AdsMapper adsMapper;
     private MockMvc mockMvc;
 
@@ -49,6 +52,22 @@ public class AdsControllerTest {
 
     @InjectMocks
     private AdsController adsController;
+
+    @BeforeEach
+    public void setUp() {
+        
+        Integer id = 1;
+        Integer author = 1;
+        String image = "image";
+        Integer price = 120;
+        String title = "круглое";
+        
+        ads.setId(id);
+        ads.setAuthor(author);
+        ads.setImage(image);
+        ads.setPrice(price);
+        ads.setTitle(title);
+    }
 
     @Test
     public void getAllAdsTest() throws Exception {
@@ -86,5 +105,35 @@ public class AdsControllerTest {
                         .get("/ads"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.responseWrapper").value(responseWrapper));
+    }
+
+    @Test
+    public void updateAdsTest() throws Exception{
+
+        Ads editAds = ads;
+        AdsDto adsDto = adsMapper.adsToAdsDto(ads);
+
+
+        when(adsRepository.save(any(Ads.class))).thenReturn(editAds);
+        when(adsService.updateAds(any(Integer.class), any(AdsDto.class))).thenReturn(adsDto);
+
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.adsDto").value(adsDto));
+    }
+
+    @Test
+    public void removeAdsTest() throws Exception {
+
+        Ads ads1 = ads;
+
+        adsRepository.save(ads1);
+        doNothing().when(adsRepository).deleteById(ads1.getId());
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .delete("/" + ads1.getId()))
+                .andExpect(status().isOk());
     }
 }
